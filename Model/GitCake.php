@@ -88,7 +88,37 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * _lsFolder
+     * listBranches
+     * Fetch repos branches
+     *
+     * @return array list of branches
+     */
+    public function listBranches() {
+        $branches = $this->repo->run('branch');
+
+        $branches = explode("\n", $branches);
+        array_pop($branches);
+
+        foreach ($branches as $a => $branch) {
+            $b = preg_split('/\s+/', $branch);
+            $branches[$a] = $b[1];
+        }
+        return $branches;
+    }
+
+    /*
+     * hasBranch
+     * Check if repo has a branch
+     *
+     * @param $branch string the branch to look up
+     * @return boolean true if branch exists
+     */
+    public function hasBranch($branch) {
+        return in_array($branch, $this->listBranches());
+    }
+
+    /*
+     * lsFolder
      * Return the contents of a tree
      *
      * @param $hash string the node to look up
@@ -99,7 +129,7 @@ class GitCake extends GitCakeAppModel {
         $files = $this->repo->run('ls-tree ' . $hash);
         $nodes = explode("\n", $files);
 
-        unset($nodes[sizeof($nodes)-1]);
+        array_pop($nodes);
 
         foreach ( $nodes as $node ) {
             $return[] = $this->_proccessNode($node);
@@ -108,7 +138,7 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * _lsFile
+     * lsFile
      * Return the contents of a blob
      *
      * @param $hash blob to look up
