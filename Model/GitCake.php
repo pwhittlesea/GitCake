@@ -14,7 +14,7 @@
 * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
 */
 
-App::import("Vendor", "Git", array("file"=>"Git/Git.php"));
+App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
 
 class GitCake extends GitCakeAppModel {
 
