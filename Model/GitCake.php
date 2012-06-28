@@ -21,6 +21,9 @@ class GitCake extends GitCakeAppModel {
     // Reference to our copy of the open git repo
     public $repo = null;
 
+    // We dont need no table
+    public $useTable = null;
+
     /*
      * loadRepo
      * Load the repo at a location
@@ -94,6 +97,8 @@ class GitCake extends GitCakeAppModel {
      * @return array list of branches
      */
     public function listBranches() {
+        if (!$this->repoLoaded()) return null;
+
         $branches = $this->repo->run('branch');
 
         $branches = explode("\n", $branches);
@@ -150,8 +155,53 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
+     * listCommits
+     * Return a list of commits
+     *
+     * @param $branch string the branch to look up
+     * @param $limit int a restriction on the number of commits to return
+     */
+    public function listCommits($branch = 'master', $limit = 10) {
+        if (!$this->repoLoaded()) return null;
+
+        $commits = $this->repo->run('rev-list --all -n'.($limit-1));
+        $commits = explode("\n", $commits);
+
+        foreach ($commits as $a => $commit) {
+            $commits[$a] = $this->_processCommit($commit);
+        }
+        return $commits;
+    }
+
+    /*
+     * _processCommit
+     * Return the details for the commit in a hash
+     *
+     * @param $hash commit to look up
+     */
+    private function _processCommit($hash) {
+        if (!$this->repoLoaded()) return null;
+
+        // Magical Git to JSON format
+        $pretty = '{"abbv":"%h","hash":"%H","subject":"%s","body":"%b","notes":"%N","date":"%ci","author":{"name":"%cn","email":"%ce"}}';
+        $almostpretty = '{"abbv":"%h","hash":"%H","date":"%ci"}';
+
+        $commit = json_decode($this->repo->run("--no-pager show -s --format='".$pretty."' ".$hash), true);
+        if (!$commit) {
+            // Our super fast JSON solution failed because someone used a " or a ', plan b!
+            $commit = json_decode($this->repo->run("--no-pager show -s --format='".$almostpretty."' ".$hash), true);
+            $commit['subject'] = trim($this->repo->run("--no-pager show -s --format='%s' ".$hash));
+            $commit['body'] = trim($this->repo->run("--no-pager show -s --format='%b' ".$hash));
+            $commit['notes'] = trim($this->repo->run("--no-pager show -s --format='%N' ".$hash));
+            $commit['author']['name'] = trim($this->repo->run("--no-pager show -s --format='%cn' ".$hash));
+            $commit['author']['email'] = trim($this->repo->run("--no-pager show -s --format='%ce' ".$hash));
+        }
+        return $commit;
+    }
+
+    /*
      * _proccessNode
-     * Return the details for the node in a linked list
+     * Return the details for the node in a hash
      * Essentially converts git row output to array
      *
      * @param $node array the node details
