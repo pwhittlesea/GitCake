@@ -112,14 +112,21 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * hasBranch
-     * Check if repo has a branch
+     * hasTree
+     * Check if repo has a tree
      *
-     * @param $branch string the branch to look up
-     * @return boolean true if branch exists
+     * @param $hash string the tree to look up
+     * @return boolean true if tree exists
      */
-    public function hasBranch($branch) {
-        return in_array($branch, $this->listBranches());
+    public function hasTree($hash) {
+        if (!$this->repoLoaded()) return null;
+
+        try {
+            $this->repo->run("ls-tree $hash");
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
     }
 
     /*
