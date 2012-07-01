@@ -232,8 +232,8 @@ class GitCake extends GitCakeAppModel {
             $file = $line[2];
 
             // Gather additions and subtractions stats
-            $output[$file]['less'] = $line[0];
-            $output[$file]['more'] = $line[1];
+            $output[$file]['less'] = $line[1];
+            $output[$file]['more'] = $line[0];
 
             // Store the pretty output from git
             $diff = trim($this->repo->run("diff-tree $color --cc -r $parent $hash -- $file"));
