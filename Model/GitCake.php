@@ -168,18 +168,92 @@ class GitCake extends GitCakeAppModel {
         $commits = explode("\n", $commits);
 
         foreach ($commits as $a => $commit) {
-            $commits[$a] = $this->_processCommit($commit);
+            $commits[$a] = $this->_commitMetadata($commit);
         }
         return $commits;
     }
 
     /*
-     * _processCommit
+     * returnCommit
+     * Return a list of commits
+     *
+     * @param $hash string the hash to look up
+     */
+    public function showCommit($hash, $color = false) {
+        if (!$this->repoLoaded()) return null;
+
+        $result['Commit'] = $this->_commitMetadata($hash);
+        $result['Commit']['diff'] = $this->_commitDiff($hash, null, $color);
+
+        return $result;
+    }
+
+    /*
+     * _commitParent
+     * Return the immediate parent of a commit
+     *
+     * @param $hash string commit to look up
+     */
+    private function _commitParent($hash) {
+        if (!$this->repoLoaded()) return null;
+
+        return preg_split('/\s+/', trim($this->repo->run("--no-pager show -s --format=%P $hash")));
+    }
+
+    /*
+     * _commitDiff
+     * Return the diff for all files altered in a hash
+     *
+     * @param $hash string commit to look up
+     * @param $parent string the parent to compare against
+     */
+    private function _commitDiff($hash, $parent = null, $color = false) {
+        if (!$this->repoLoaded()) return null;
+
+        // If no hash to compare against was provided then use the direct parent
+        if ($parent == null) $parent = $this->_commitParent($hash);
+
+        // Do we want pretty color output
+        if ($color) 
+            $color = '--color';
+        else 
+            $color = '';
+
+        // For now we are ignoring multiple parents
+        $parent = $parent[0];
+
+        // Obtain all the changed files in the diff
+        $files = explode("\n", trim($this->repo->run("diff-tree --numstat $parent $hash")));
+
+        $output = array();
+
+        foreach ($files as $file) {
+            $line = preg_split('/\s+/', $file);
+            $file = $line[2];
+
+            // Gather additions and subtractions stats
+            $output[$file]['less'] = $line[0];
+            $output[$file]['more'] = $line[1];
+
+            // Store the pretty output from git
+            $diff = trim($this->repo->run("diff-tree $color --cc -r $parent $hash -- $file"));
+
+            // Allow for the color character
+            $cut = ($color == '') ? strpos($diff, '@@') : strpos($diff, '@@') - 4;
+
+            $output[$file]['diff'] = substr($diff, $cut);
+        }
+
+        return $output;
+    }
+
+    /*
+     * _commitMetadata
      * Return the details for the commit in a hash
      *
      * @param $hash commit to look up
      */
-    private function _processCommit($hash) {
+    private function _commitMetadata($hash) {
         if (!$this->repoLoaded()) return null;
 
         // Magical Git to JSON format
