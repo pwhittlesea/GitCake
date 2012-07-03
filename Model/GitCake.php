@@ -34,8 +34,12 @@ class GitCake extends GitCakeAppModel {
     public function loadRepo($base = null) {
         if ($base == null) return null;
 
-        $this->repo = Git::open($base);
-        return true;
+        try {
+            $this->repo = Git::open($base);
+        } catch (Exception $e) {
+            return null;
+        }
+        return $this->repo;
     }
 
     /*
