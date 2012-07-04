@@ -60,3 +60,48 @@ Finally, you can now use the GitCake Plugin in your controller:
       return $this->GitCake->loadRepo("/home/user/projects/$name.git");
   }
 ```
+
+Usage
+-----
+
+After you've followed the installation steps, it will now be time to extract your data:
+
+### tree($hash = 'master', $folderPath = '')
+The tree() function is designed to return the contents of a Git tree. Passing a tree hash or folder location with a branch will enable you to find the contents of a tree:
+```php
+  $this->GitCake->loadRepo("/home/user/projects/example.git");
+  $out = $this->GitCake->tree(); // Return the top level tree of a repo
+```
+Traditional Git output would show:
+```bash
+$ git ls-tree master ''
+100644 blob 12656ced5f8b89d4ce2e3a48a80a2d0ea652a072	README.md
+040000 tree ab0433981c68b7ebdd2f8339a18e2a89f19191b7	Model
+```
+Whereas $out will now contain:
+```php
+array(2) {
+  [0]=> 
+  array(4) {
+    [permissions]=>
+    string(6) "100644"
+    [type]=>
+    string(4) "blob"
+    [hash]=>
+    string(40) "12656ced5f8b89d4ce2e3a48a80a2d0ea652a072"
+    [name]=>
+    string(9) "README.md"
+  }
+  [1]=> 
+  array(4) {
+    [permissions]=>
+    string(6) "040000"
+    [type]=>
+    string(4) "tree"
+    [hash]=>
+    string(40) "ab0433981c68b7ebdd2f8339a18e2a89f19191b7"
+    [name]=>
+    string(5) "Model"
+  }
+}
+```
