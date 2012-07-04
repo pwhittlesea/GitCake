@@ -95,23 +95,23 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * listBranches
+     * branch
      * Fetch repos branches
      *
      * @return array list of branches
      */
-    public function listBranches() {
+    public function branch() {
         if (!$this->repoLoaded()) return null;
 
-        $branches = $this->repo->run('branch');
+        $resp = $this->repo->run('branch');
+        $branches = array();
 
-        $branches = explode("\n", $branches);
-        array_pop($branches);
-
-        foreach ($branches as $a => $branch) {
-            $b = preg_split('/\s+/', $branch);
-            $branches[$a] = $b[1];
+        foreach (explode("\n", $resp) as $value) {
+            if (preg_match('/^\*? +(?P<name>\S+)/', $value, $matches)) {
+                $branches[] = $matches['name'];
+            }
         }
+
         return $branches;
     }
 
@@ -243,9 +243,9 @@ class GitCake extends GitCakeAppModel {
         if ($parent == null) $parent = $this->_commitParent($hash);
 
         // Do we want pretty color output
-        if ($color) 
+        if ($color)
             $color = '--color';
-        else 
+        else
             $color = '';
 
         // For now we are ignoring multiple parents
