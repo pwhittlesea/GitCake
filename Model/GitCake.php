@@ -200,6 +200,24 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
+     * repoSize
+     * Return a list sizes returned by count-objects
+     *
+     */
+    public function repoSize() {
+        if (!$this->repoLoaded()) return null;
+
+        $stats = explode("\n", trim($this->repo->run('count-objects -v')));
+
+        foreach ( $stats as $a => $stat ) {
+            $temp = preg_split('/:\s+/', $stat);
+            unset($stats[$a]);
+            $stats[$temp[0]] = $temp[1];
+        }
+        return $stats;
+    }
+
+    /*
      * _commitParent
      * Return the immediate parent of a commit
      *
