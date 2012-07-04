@@ -239,6 +239,29 @@ class GitCake extends GitCakeAppModel {
         return $output;
     }
 
+    /**
+     * blame
+     *
+     * @param $filepath string the path to blame
+     */
+    function blame($branch, $filepath){
+        if (!$this->repoLoaded()) return null;
+
+        $resp = $this->repo->run("blame -l $branch -- $filepath");
+
+        $blame = array();
+        foreach ($out as $line) {
+            if (preg_match('/^([0-9a-z^]+) \(([^ \)]+) +([^\)]+) +([\d]+)\) (.*)$/',$line,$matches)) {
+                $blame[] = array('hash' => $matches[1],
+                                 'commiter' => $matches[2],
+                                 'date' => $matches[3],
+                                 'line' => $matches[4],
+                                 'code' => $matches[5]);
+            }
+        }
+        return $blame;
+    }
+
     /*
      * _commitParent
      * Return the immediate parent of a commit
