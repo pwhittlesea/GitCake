@@ -202,35 +202,17 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * _commitParent
-     * Return the immediate parent of a commit
-     *
-     * @param $hash string commit to look up
-     */
-    private function _commitParent($hash) {
-        if (!$this->repoLoaded()) return null;
-
-        return preg_split('/\s+/', trim($this->repo->run("--no-pager show -s --format=%P $hash")));
-    }
-
-    /*
-     * _commitDiff
+     * diff
      * Return the diff for all files altered in a hash
      *
      * @param $hash string commit to look up
      * @param $parent string the parent to compare against
      */
-    private function _commitDiff($hash, $parent = null, $color = false) {
+    private function diff($hash, $parent = null) {
         if (!$this->repoLoaded()) return null;
 
         // If no hash to compare against was provided then use the direct parent
         if ($parent == null) $parent = $this->_commitParent($hash);
-
-        // Do we want pretty color output
-        if ($color)
-            $color = '--color';
-        else
-            $color = '';
 
         // For now we are ignoring multiple parents
         $parent = $parent[0];
@@ -249,15 +231,24 @@ class GitCake extends GitCakeAppModel {
             $output[$file]['more'] = $line[0];
 
             // Store the pretty output from git
-            $diff = trim($this->repo->run("diff-tree $color --cc -r $parent $hash -- $file"));
+            $diff = trim($this->repo->run("diff-tree --cc -r $parent $hash -- $file"));
 
-            // Allow for the color character
-            $cut = ($color == '') ? strpos($diff, '@@') : strpos($diff, '@@') - 4;
-
-            $output[$file]['diff'] = substr($diff, $cut);
+            $output[$file]['diff'] = substr($diff, strpos($diff, '@@'));
         }
 
         return $output;
+    }
+
+    /*
+     * _commitParent
+     * Return the immediate parent of a commit
+     *
+     * @param $hash string commit to look up
+     */
+    private function _commitParent($hash) {
+        if (!$this->repoLoaded()) return null;
+
+        return preg_split('/\s+/', trim($this->repo->run("--no-pager show -s --format=%P $hash")));
     }
 
     /*
