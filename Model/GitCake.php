@@ -71,30 +71,6 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * getNodeAtPath
-     * Return the details of the current node
-     *
-     * @param $branch string branch to examine
-     * @param $path string the path to examine
-     */
-    public function getNodeAtPath($branch = 'master', $path = '') {
-        if (!$this->repoLoaded()) return null;
-
-        // If we are looking at the root of the project
-        if ($path == '') {
-            return array(
-                'type' => 'tree',
-                'hash' => $branch,
-            );
-        }
-
-        $files = $this->repo->run("ls-tree $branch $path");
-        $nodes = explode("\n", $files);
-
-        return $this->_proccessNode($nodes[0]);
-    }
-
-    /*
      * branch
      * Fetch repos branches
      *
