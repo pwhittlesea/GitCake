@@ -110,77 +110,85 @@ class GitCake extends GitCakeAppModel {
     }
 
     /*
-     * lsFolder
+     * tree
      * Return the contents of a tree
      *
      * @param $hash string the node to look up
+     * @param $path string the path to examine
      */
-    public function lsFolder($hash) {
+    public function tree($hash = 'master', $folderPath = '') {
         if (!$this->repoLoaded()) return null;
 
-        $files = $this->repo->run('ls-tree ' . $hash);
-        $nodes = explode("\n", $files);
+        $resp = $this->repo->run("ls-tree $hash $folderPath");
+        $tree = array();
 
-        array_pop($nodes);
-
-        foreach ( $nodes as $node ) {
-            $return[] = $this->_proccessNode($node);
+        foreach (explode("\n", $resp) as $file) {
+            if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-z]+)\s(?P<name>.+)/',$file,$matches)) {
+                $tree[] = array(
+                    'permissions' => $matches['permissions'],
+                    'type' => $matches['type'],
+                    'hash' => $matches['hash'],
+                    'name' => $matches['name']
+                );
+            }
         }
-        return $return;
+        return $tree;
     }
 
     /*
-     * lsFile
+     * blob
      * Return the contents of a blob
      *
      * @param $hash blob to look up
      */
-    public function lsFile($hash) {
+    public function blob($hash) {
         if (!$this->repoLoaded()) return null;
 
         return $this->repo->run('show ' . $hash);
     }
 
     /*
-     * listCommits
+     * log
      * Return a list of commits
      *
      * @param $branch string the branch to look up
      * @param $limit int a restriction on the number of commits to return
+     * @param $offset int an offest for the number restriction
+     * @param $filepath string files can be specified to limit log return
      */
-    public function listCommits($branch = 'master', $limit = 10) {
+    public function log($branch = 'master', $limit = 10, $offset = 0, $filepath = '') {
         if (!$this->repoLoaded()) return null;
 
-        $commits = $this->repo->run('rev-list --all -n'.($limit-1));
+        $commits = trim($this->repo->run("rev-list --all -n $limit --skip $offset $branch -- $filepath"));
         $commits = explode("\n", $commits);
 
         foreach ($commits as $a => $commit) {
-            $commits[$a] = $this->_commitMetadata($commit);
+            $commits[$a] = $this->showCommit($commit);
         }
         return $commits;
     }
 
     /*
-     * returnCommit
+     * showCommit
      * Return a list of commits
      *
      * @param $hash string the hash to look up
      */
-    public function showCommit($hash, $color = false) {
+    public function showCommit($hash) {
         if (!$this->repoLoaded()) return null;
 
         $result['Commit'] = $this->_commitMetadata($hash);
-        $result['Commit']['diff'] = $this->_commitDiff($hash, null, $color);
+        $result['Commit']['diff'] = $this->diff($hash);
 
         return $result;
     }
 
     /*
-     * repoSize
+     * size
      * Return a list sizes returned by count-objects
      *
      */
-    public function repoSize() {
+    public function size() {
         if (!$this->repoLoaded()) return null;
 
         $stats = explode("\n", trim($this->repo->run('count-objects -v')));
