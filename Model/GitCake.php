@@ -274,31 +274,9 @@ class GitCake extends GitCakeAppModel {
             $commit['author']['name'] = trim($this->repo->run("--no-pager show -s --format='%cn' ".$hash));
             $commit['author']['email'] = trim($this->repo->run("--no-pager show -s --format='%ce' ".$hash));
         }
+        $commit['parent'] = preg_split('/\s+/', trim($this->repo->run("--no-pager show -s --format='%P' $hash")));
+
         return $commit;
-    }
-
-    /*
-     * _proccessNode
-     * Return the details for the node in a hash
-     * Essentially converts git row output to array
-     *
-     * @param $node array the node details
-     */
-    private function _proccessNode($node) {
-        $node = preg_split('/\s+/', $node);
-
-        if ( !isset($node[0]) ||
-             !isset($node[1]) ||
-             !isset($node[2]) ||
-             !isset($node[3]) ) {
-            return null;
-        }
-        return array(
-            'permissions' => $node[0],
-            'type'        => $node[1],
-            'hash'        => $node[2],
-            'name'        => $node[3],
-        );
     }
 
 }
