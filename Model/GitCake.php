@@ -266,6 +266,18 @@ class GitCake extends GitCakeAppModel {
         return $blame;
     }
 
+    /**
+     * exec
+     * For those times when the built in functions arnt enough
+     *
+     * @param $command string the command to run
+     */
+    public function exec($command) {
+        if (!$this->repoLoaded()) return null;
+
+        return $this->repo->run($command);
+    }
+
     /*
      * _commitParent
      * Return the immediate parent of a commit
