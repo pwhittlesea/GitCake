@@ -215,7 +215,11 @@ class GitCake extends GitCakeAppModel {
         if ($parent == null) $parent = $this->_commitParent($hash);
 
         // For now we are ignoring multiple parents
-        $parent = $parent[0];
+        if (isset($parent[0]) && $parent[0] != '') {
+            $parent = $parent[0];
+        } else {
+            $parent = 'HEAD';
+        }
 
         // Obtain all the changed files in the diff
         $files = explode("\n", trim($this->repo->run("diff-tree --numstat $parent $hash")));
@@ -244,7 +248,7 @@ class GitCake extends GitCakeAppModel {
      *
      * @param $filepath string the path to blame
      */
-    function blame($branch, $filepath){
+    public function blame($branch, $filepath){
         if (!$this->repoLoaded()) return null;
 
         $resp = $this->repo->run("blame -l $branch -- $filepath");
