@@ -119,29 +119,72 @@ class GitCake extends GitCakeAppModel {
     public function tree($hash = 'master', $folderPath = '') {
         if (!$this->repoLoaded()) return null;
 
-        $resp = $this->repo->run("ls-tree $hash $folderPath");
-        $tree = array();
-
-        foreach (explode("\n", $resp) as $file) {
-            if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-z]+)\s(?P<name>.+)/',$file,$matches)) {
-                $tree[] = array(
-                    'permissions' => $matches['permissions'],
-                    'type' => $matches['type'],
-                    'hash' => $matches['hash'],
-                    'name' => $matches['name']
-                );
-            }
+        // Check the last character isnt a / otherwise git will return the contents of the folder
+        if ($folderPath != '' && $folderPath[strlen($folderPath)-1] == '/') {
+            $folderPath = substr($folderPath, 0, strlen($folderPath)-1);
         }
-        return $tree;
+
+        // Lets start from the base of the repo
+        if ($folderPath == '') {
+            $folderPath = '.';
+        }
+
+        if ($folderPath == '.') {
+            $current = "0 tree $hash $hash";
+        } else {
+            $current = $this->repo->run("ls-tree $hash -- $folderPath");
+        }
+
+        if (empty($current)) {
+            return array('type' => 'invalid');
+        }
+
+        // Fetch the details of the path we are looking at and check it parses
+        if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-z]+)\s(?P<name>.+)/', $current, $current)) {
+            return array('type' => 'invalid');
+        }
+
+        // Init standard return array
+        $return = array(
+            'type' => $current['type'],
+            'content' => '',
+            'path' => $folderPath
+        );
+
+        // Handle blob case (I know its a tree function, but we might as well)
+        if ($current['type'] == 'blob') {
+            $return['content'] = $this->repo->run('show ' . $current['hash']);
+        }
+
+        // Handle tree case
+        if ($current['type'] == 'tree') {
+            $folder = explode("\n", trim($this->repo->run("ls-tree $hash $folderPath/")));
+
+            // Iterate through tree contents
+            foreach ($folder as $a => $file) {
+                if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-z]+)\s(?P<name>.+)/',$file,$matches)) {
+                    $folder[$a] =  array(
+                        'permissions' => $matches['permissions'],
+                        'type' => $matches['type'],
+                        'hash' => $matches['hash'],
+                        'name' => str_replace("$folderPath/", "", $matches['name'])
+                    );
+                }
+            }
+
+            $return['content'] = $folder;
+        }
+
+        return $return;
     }
 
     /*
-     * blob
-     * Return the contents of a blob
+     * show
+     * Return the details of a blob
      *
      * @param $hash blob to look up
      */
-    public function blob($hash) {
+    public function show($hash) {
         if (!$this->repoLoaded()) return null;
 
         return $this->repo->run('show ' . $hash);
