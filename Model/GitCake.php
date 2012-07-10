@@ -153,7 +153,7 @@ class GitCake extends GitCakeAppModel {
 
         // Handle blob case (I know its a tree function, but we might as well)
         if ($current['type'] == 'blob') {
-            $return['content'] = $this->repo->run('show ' . $current['hash']);
+            $return['content'] = $this->show($current['hash']);
         }
 
         // Handle tree case
