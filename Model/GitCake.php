@@ -203,11 +203,11 @@ class GitCake extends GitCakeAppModel {
     public function log($branch = 'master', $limit = 10, $offset = 0, $filepath = '') {
         if (!$this->repoLoaded()) return null;
 
-        $commits = trim($this->repo->run("rev-list --all -n $limit --skip $offset $branch -- $filepath"));
+        $commits = trim($this->repo->run("rev-list --all -n $limit --skip=$offset $branch -- $filepath"));
         $commits = explode("\n", $commits);
 
         foreach ($commits as $a => $commit) {
-            $commits[$a] = $this->showCommit($commit);
+            $commits[$a] = $this->showCommit($commit, false);
         }
         return $commits;
     }
@@ -217,12 +217,15 @@ class GitCake extends GitCakeAppModel {
      * Return a list of commits
      *
      * @param $hash string the hash to look up
+     * @param $diff boolean do we want a diff?
      */
-    public function showCommit($hash) {
+    public function showCommit($hash, $diff = true) {
         if (!$this->repoLoaded()) return null;
 
         $result['Commit'] = $this->_commitMetadata($hash);
-        $result['Commit']['diff'] = $this->diff($hash);
+        if ($diff) {
+            $result['Commit']['diff'] = $this->diff($hash);
+        }
 
         return $result;
     }
