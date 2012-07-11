@@ -1,3 +1,6 @@
 [submodule "Vendor/Git"]
 	path = Vendor/Git
 	url = git://github.com/pwhittlesea/Git.php.git
+[submodule "Vendor/UnifiedDiff"]
+	path = Vendor/UnifiedDiff
+	url = git://github.com/pwhittlesea/UnifiedDiff.git

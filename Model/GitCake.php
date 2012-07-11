@@ -15,6 +15,7 @@
 */
 
 App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
+App::import("Vendor", "SVNCake.UnifiedDiff", array("file"=>"UnifiedDiff/Diff.php"));
 
 class GitCake extends GitCakeAppModel {
 
@@ -264,23 +265,20 @@ class GitCake extends GitCakeAppModel {
             $parent = 'HEAD';
         }
 
-        // Obtain all the changed files in the diff
-        $files = explode("\n", trim($this->repo->run("diff-tree --numstat $parent $hash")));
+        // Obtain the diff
+        $output = $this->repo->run("diff-tree --cc $parent $hash");
 
-        $output = array();
+        $output = Diff::parse($output);
 
-        foreach ($files as $file) {
-            $line = preg_split('/\s+/', $file);
-            $file = $line[2];
+        foreach ($output as $file => $array) {
+            // Lets request the number stats for the file
+            $numstat = trim($this->repo->run("diff-tree --numstat $parent $hash -- $file"));
+
+            $line = preg_split('/\s+/', $numstat);
 
             // Gather additions and subtractions stats
             $output[$file]['less'] = $line[1];
             $output[$file]['more'] = $line[0];
-
-            // Store the pretty output from git
-            $diff = trim($this->repo->run("diff-tree --cc -r $parent $hash -- $file"));
-
-            $output[$file]['diff'] = substr($diff, strpos($diff, '@@'));
         }
 
         return $output;
