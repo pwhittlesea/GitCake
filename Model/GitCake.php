@@ -311,6 +311,33 @@ class GitCake extends GitCakeAppModel {
     }
 
     /**
+     * submodules
+     * return a list of the submodules for the project
+     *
+     * @param $branch string the branch to extract the submodules from
+     */
+    public function submodules($branch) {
+        $resp = $this->tree($branch, '.gitmodules');
+
+        $sub = array();
+
+        if (!isset($resp['content'])) {
+            return $sub;
+        }
+        preg_match_all('#\[submodule\s+[\"\'](?P<name>\S*)[\"\']\]\s+path\s=\s(?P<path>\S+)\s+url\s=\s(?P<remote>\S+)#', $resp['content'], $matches);
+
+        // Just incase there are no submodules
+        if (empty($matches)) {
+            return $sub;
+        }
+
+        foreach ($matches['name'] as $i => $name) {
+            $sub[$matches['path'][$i]] = array('name'=>$matches['name'][$i], 'remote'=>$matches['remote'][$i]);
+        }
+        return $sub;
+    }
+
+    /**
      * exec
      * For those times when the built in functions arnt enough
      *
