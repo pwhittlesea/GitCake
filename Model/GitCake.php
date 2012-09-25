@@ -15,7 +15,7 @@
 */
 
 App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
-App::import("Vendor", "SVNCake.UnifiedDiff", array("file"=>"UnifiedDiff/Diff.php"));
+App::import("Vendor", "GitCake.UnifiedDiff", array("file"=>"UnifiedDiff/Diff.php"));
 
 class GitCake extends GitCakeAppModel {
 
