@@ -48,16 +48,30 @@ class GitCake extends GitCakeAppModel {
      * Create a repo at a location
      *
      * @param $base string the path to use
+     * @param $mode string the permissions mode to set on the repository (supports chmod-style arguments e.g. g+rwX, 0750)
      * @return boolean true if repo is created
      */
-    public function createRepo($base = null) {
+    public function createRepo($base = null, $mode = null) {
         if ($base == null) return null;
+
+        if(!preg_match('/^([0-9]+)|([ugoa]+[+-=][rwxX]+)$/', $mode)){
+            $mode = null;
+        }
 
         if (!file_exists($base)) {
             mkdir($base, 0777);
         }
 
         $this->repo = Git::create($base, null, true);
+
+        // Ensure the permissions are set correctly, e.g. so the git group can have write access.
+        // Ugh.  No recursive chmod() in PHP.  Ahead fudge factor 3.
+        // TODO could be replaced with a lot of extra code to recurse down
+        // the directory tree, if there's a reason to (safe mode?)
+        if($mode != null){
+            system('chmod -R ' . escapeshellarg($mode) . ' ' . escapeshellarg($base));
+        }
+
         return true;
     }
 
