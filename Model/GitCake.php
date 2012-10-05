@@ -49,9 +49,10 @@ class GitCake extends GitCakeAppModel {
      *
      * @param $base string the path to use
      * @param $mode string the permissions mode to set on the repository (supports chmod-style arguments e.g. g+rwX, 0750)
+     * @param $shared string the 'shared' option as per git init - (false|true|umask|group|all|world|everybody|0xxx)
      * @return boolean true if repo is created
      */
-    public function createRepo($base = null, $mode = null) {
+    public function createRepo($base = null, $mode = null, $shared = false) {
         if ($base == null) return null;
 
         if(!preg_match('/^([0-9]+)|([ugoa]+[+-=][rwxX]+)$/', $mode)){
@@ -62,7 +63,8 @@ class GitCake extends GitCakeAppModel {
             mkdir($base, 0777);
         }
 
-        $this->repo = Git::create($base, null, true);
+        // Note that $shared is sanitised within the Git class
+        $this->repo = Git::create($base, null, true, $shared);
 
         // Ensure the permissions are set correctly, e.g. so the git group can have write access.
         // Ugh.  No recursive chmod() in PHP.  Ahead fudge factor 3.
