@@ -275,13 +275,20 @@ class GitCake extends GitCakeAppModel {
         if (!$this->repoLoaded()) return null;
 
         // If no hash to compare against was provided then use the direct parent
-        if ($parent == null) $parent = $this->_commitParent($hash);
+        if ($parent == null) {
+            $parent = $this->_commitParent($hash);
 
-        // For now we are ignoring multiple parents
-        if (isset($parent[0]) && $parent[0] != '') {
-            $parent = $parent[0];
-        } else {
-            $parent = 'HEAD';
+            // For now we are ignoring multiple parents
+            if (isset($parent[0]) && $parent[0] != '') {
+                $parent = $parent[0];
+            } else {
+                // Finding the parent failed. Calculate, is this the first commit?
+                if ($parent[0] == '') {
+                    $parent = '--root';
+                } else {
+                    $parent = 'HEAD';
+                }
+            }
         }
 
         // Obtain the diff
@@ -295,9 +302,12 @@ class GitCake extends GitCakeAppModel {
 
             $line = preg_split('/\s+/', $numstat);
 
+            // Sometimes the hash is returned as the first element
+            $off = (isset($line[3])) ? 1 : 0;
+
             // Gather additions and subtractions stats
-            $output[$file]['less'] = $line[1];
-            $output[$file]['more'] = $line[0];
+            $output[$file]['less'] = $line[$off + 1];
+            $output[$file]['more'] = $line[$off + 0];
         }
 
         return $output;
