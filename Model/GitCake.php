@@ -219,7 +219,7 @@ class GitCake extends GitCakeAppModel {
     public function log($branch = 'master', $limit = 10, $offset = 0, $filepath = '') {
         if (!$this->repoLoaded()) return null;
 
-        $commits = trim($this->repo->run("rev-list --all -n $limit --skip=$offset $branch -- $filepath"));
+        $commits = trim($this->exec("rev-list --all -n $limit --skip=$offset $branch -- $filepath"));
         $commits = explode("\n", $commits);
 
         foreach ($commits as $a => $commit) {
@@ -292,7 +292,7 @@ class GitCake extends GitCakeAppModel {
         }
 
         // Obtain the diff
-        $output = $this->repo->run("diff-tree --cc $parent $hash");
+        $output = $this->exec("diff-tree --cc $parent $hash");
 
         $output = Diff::parse($output);
 
