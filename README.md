@@ -128,3 +128,17 @@ array(
 	)
 )
 ```
+#### Blob::submodules($branch = 'master')
+The submodules() function is designed to return the submodules that a branch of a repository has. Passing a branch hash will return an array of submodules.
+```php
+  $this->Blob->open(RepoTypes::Git, "/home/user/projects/example.git");
+  $out = $this->Blob->submodules('master'); // Return the submodules of master
+```
+$out will now contain:
+```php
+array(
+	'app/Plugin/GitCake' => array(
+		'name' => 'app/Plugin/GitCake',
+		'remote' => 'github.com/pwhittlesea/GitCake.git'
+	),
+)
