@@ -116,9 +116,9 @@ class GitCakeAppModel extends AppModel {
         if ($this->repoType == RepoTypes::Git) {
             App::uses('SourceGit', 'GitCake.Model');
             $this->engine = new SourceGit();
-        } else if ($this->repoType == RepoType::Subversion) {
+        } else if ($this->repoType == RepoTypes::Subversion) {
             App::uses('SourceSubversion', 'GitCake.Model');
-            $this->engine = new SourceGit();
+            $this->engine = new SourceSubversion();
         } else {
             throw new Exception("Repository Type Unknown");
         }
