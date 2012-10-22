@@ -312,7 +312,7 @@ class SourceGit implements SourceControl {
      * @return void
      */
     public function revisionList($branch, $number, $offset, $file = '') {
-        return $this->exec("rev-list -n $number --skip=$offset $branch -- $file");
+        return explode("\n", $this->exec("rev-list -n $number --skip=$offset $branch -- $file"));
     }
 
     /**

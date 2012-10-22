@@ -89,7 +89,7 @@ class GitCakeAppModel extends AppModel {
      * @return void
      */
     public function history($branch, $number, $offset, $file = '') {
-        return explode("\n", $this->engine->revisionList($branch, $number, $offset, $file));
+        return $this->engine->revisionList($branch, $number, $offset, $file);
     }
 
     /**
