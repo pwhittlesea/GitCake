@@ -207,7 +207,10 @@ class SourceGit implements SourceControl {
         if ($parent == null || $parent == '') {
             $parent = '--root';
         }
-        return $this->exec("diff-tree --name-only -r $parent $hash");
+        $changes = $this->exec("diff-tree --name-only -r $parent $hash");
+
+        $changes = str_replace("$hash\n", '', $changes);
+        return preg_split('/[\r\n]+/', $changes);
     }
 
     /**
@@ -229,23 +232,6 @@ class SourceGit implements SourceControl {
             $fileName = '';
         }
         return $this->exec("diff-tree --cc $parent $hash $fileName");
-    }
-
-    /**
-     * getDiffStats function.
-     *
-     * @access public
-     * @param mixed $hash
-     * @param mixed $parent
-     * @param mixed $file
-     * @return void
-     */
-    public function getDiffStats($hash, $parent, $file) {
-        if ($parent == null || $parent == '') {
-            $parent = '--root';
-        }
-        return $this->exec("diff-tree --numstat $parent $hash -- $file");
-
     }
 
     /**

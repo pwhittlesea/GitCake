@@ -40,17 +40,15 @@ class Commit extends GitCakeAppModel {
         $output = Diff::parse($output);
 
         foreach ($output as $fileName => $array) {
-            // Lets request the number stats for the file
-            $numstat = $this->engine->getDiffStats($hash, $parent, $fileName);
+            $output[$fileName]['less'] = 0;
+            $output[$fileName]['more'] = 0;
 
-            $line = preg_split('/\s+/', $numstat);
-
-            // Sometimes the hash is returned as the first element
-            $off = (isset($line[3])) ? 1 : 0;
-
-            // Gather additions and subtractions stats
-            $output[$fileName]['less'] = $line[$off + 1];
-            $output[$fileName]['more'] = $line[$off + 0];
+            foreach ($array['hunks'] as $hunk) {
+                foreach ($hunk as $line) {
+                    if ($line[0] == '-') $output[$fileName]['less']++;
+                    if ($line[0] == '+') $output[$fileName]['more']++;
+                }
+            }
         }
 
         if ($file != '') {

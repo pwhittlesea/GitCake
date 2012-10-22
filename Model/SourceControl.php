@@ -24,7 +24,6 @@ interface SourceControl {
     public function getCommitMetadata($hash, $metadata);
     public function getChangedFiles($hash, $parent);
     public function getDiff($hash, $parent, $file);
-    public function getDiffStats($hash, $parent, $file);
     public function getPathDetails($branch, $path);
     public function open($location);
     public function revisionList($branch, $number, $offset, $file);

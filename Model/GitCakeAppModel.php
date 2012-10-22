@@ -59,9 +59,7 @@ class GitCakeAppModel extends AppModel {
             } else if ($parents[0] == '') {
                 $commit['parent'] = null;
             }
-            $changes = $this->engine->getChangedFiles($hash, $commit['parent']);
-            $changes = str_replace("$hash\n", '', $changes);
-            $commit['changeset'] =  preg_split('/[\r\n]+/', $changes);
+            $commit['changeset'] = $this->engine->getChangedFiles($hash, $commit['parent']);
         }
 
         return $commit;
