@@ -23,7 +23,7 @@ class SourceGit implements SourceControl {
 
     public $repo = null;
     public $type = RepoTypes::Git;
-    private $branches;
+    private $branches = array();
 
     // This is security by obscurity for now
     private $md1 = '{@{';
@@ -102,7 +102,7 @@ class SourceGit implements SourceControl {
      * @return void
      */
     private function exec($command) {
-        // debug($command);
+        // debug("git $command");
         return trim($this->repo->run($command));
     }
 
@@ -249,6 +249,40 @@ class SourceGit implements SourceControl {
     }
 
     /**
+     * getPathDetails function.
+     *
+     * @access public
+     * @param mixed $branch
+     * @param mixed $path
+     * @return void
+     */
+    public function getPathDetails($branch, $path) {
+        // Check the last character isnt a / otherwise git will return the contents of the folder
+        if ($path != '' && $path[strlen($path)-1] == '/') {
+            $path = substr($path, 0, strlen($path)-1);
+        }
+
+        if ($path == '.' || $path == '') {
+            return array(
+                'hash' => $branch,
+                'name' => $branch,
+                'type' => 'tree',
+                'permissions' => '0'
+            );
+        }
+
+        if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $this->exec("ls-tree $branch -- $path"), $details)) {
+            return null;
+        }
+        return array(
+            'hash' => $details['hash'],
+            'name' => $details['name'],
+            'type' => $details['type'],
+            'permissions' => $details['permissions']
+        );
+    }
+
+    /**
      * open function.
      *
      * @access public
@@ -301,6 +335,20 @@ class SourceGit implements SourceControl {
      * @return void
      */
     public function treeList($branch, $folderPath = '') {
-        return $this->exec("ls-tree $branch -- $folderPath");
+        $contents = array();
+
+        foreach (explode("\n", $this->exec("ls-tree $branch -- $folderPath")) as $a => $file) {
+            if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $file, $matches)) {
+                $contents[$a] = array(
+                    'permissions' => $matches['permissions'],
+                    'type'        => $matches['type'],
+                    'hash'        => $matches['hash'],
+                    'path'        => $matches['name'],
+                    'name'        => str_replace("$folderPath", "", $matches['name'])
+                );
+            }
+        }
+
+        return $contents;
     }
 }

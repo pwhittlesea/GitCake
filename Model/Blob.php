@@ -40,22 +40,15 @@ class Blob extends GitCakeAppModel {
         if ($folderPath != '' && $folderPath[strlen($folderPath)-1] == '/') {
             $folderPath = substr($folderPath, 0, strlen($folderPath)-1);
         }
+
         // Lets start from the base of the repo
         if ($folderPath == '') {
             $folderPath = '.';
         }
 
-        if ($folderPath == '.') {
-            $current = "0 tree $branch $branch";
-        } else {
-            $current = $this->engine->treeList($branch, $folderPath);
-            if (empty($current)) {
-                return array('type' => 'invalid');
-            }
-        }
+        $current = $this->engine->getPathDetails($branch, $folderPath);
 
-        // Fetch the details of the path we are looking at and check it parses
-        if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-z]+)\s(?P<name>.+)/', $current, $current)) {
+        if ($current == null) {
             return array('type' => 'invalid');
         }
 
@@ -66,32 +59,19 @@ class Blob extends GitCakeAppModel {
             'path'    => $folderPath,
             'commit'  => $this->commitDetails($branch)
         );
+
         if ($current['type'] == 'blob') {
             $return['content'] = $this->engine->show($current['hash']);
             $return['updated'] = $this->lastChange($branch, $current['name']);
         } else if ($current['type'] == 'tree') {
-            foreach (explode("\n", $this->engine->treeList($branch, "$folderPath/")) as $a => $file) {
-                if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-z]+)\s(?P<name>.+)/',$file,$matches)) {
-                    $_permissions = $matches['permissions'];
-                    $_type        = $matches['type'];
-                    $_hash        = $matches['hash'];
-                    $_path        = $matches['name'];
-                    $_name        = str_replace("$folderPath/", "", $matches['name']);
-                    $_updated     = $this->lastChange($branch, $matches['name']);
+            $return['content'] = $this->engine->treeList($branch, "$folderPath/");
 
-                    $file = array(
-                        'permissions' => $_permissions,
-                        'type'        => $_type,
-                        'hash'        => $_hash,
-                        'name'        => $_name,
-                        'path'        => $_path,
-                        'updated'     => $_updated
-                    );
-                    if ($_type == 'commit') {
-                        $submodules = (!isset($submodules)) ? $this->submodules($branch) : $submodules;
-                        $file['remote'] = (isset($submodules[$matches['name']])) ? $submodules[$matches['name']]['remote'] : '';
-                    }
-                    $return['content'][] = $file;
+            foreach ($return['content'] as $a => $file) {
+                $return['content'][$a]['updated'] = $this->lastChange($branch, $file['path']);
+
+                if ($file['type'] == 'commit') {
+                    $submodules = (!isset($submodules)) ? $this->submodules($branch) : $submodules;
+                    $return['content'][$a]['remote'] = (isset($submodules[$file['name']])) ? $submodules[$file['name']]['remote'] : '';
                 }
             }
         }
