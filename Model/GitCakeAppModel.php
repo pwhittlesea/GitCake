@@ -101,6 +101,16 @@ class GitCakeAppModel extends AppModel {
     }
 
     /**
+     * getType function.
+     *
+     * @access public
+     * @return void
+     */
+    public function getType() {
+        return $this->engine->getType();
+    }
+
+    /**
      * open function.
      *
      * @access public

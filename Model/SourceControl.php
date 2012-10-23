@@ -25,6 +25,7 @@ interface SourceControl {
     public function getChangedFiles($hash, $parent);
     public function getDiff($hash, $parent, $file);
     public function getPathDetails($branch, $path);
+    public function getType();
     public function open($location);
     public function revisionList($branch, $number, $offset, $file);
     public function show($hash);

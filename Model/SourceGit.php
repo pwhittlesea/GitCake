@@ -269,6 +269,16 @@ class SourceGit implements SourceControl {
     }
 
     /**
+     * getType function.
+     *
+     * @access public
+     * @return void
+     */
+    public function getType() {
+        return $this->type;
+    }
+
+    /**
      * open function.
      *
      * @access public
