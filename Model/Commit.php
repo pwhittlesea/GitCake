@@ -52,8 +52,23 @@ class Commit extends GitCakeAppModel {
         }
 
         if ($file != '') {
+            if (isset($output[$file])) {
+                return $output[$file];
+            }
+
             // Special case where folders are stored as changes in SVN
-            return (isset($output[$file])) ? $output[$file] : null;
+            try {
+                $this->engine->treeList($hash, $file);
+                $added = true;
+            } catch (Exception $e) {
+                $added = false;
+            }
+
+            return array(
+                'less' => (int) ((!$added) ? 1 : 0),
+                'more' => (int) (($added) ? 1 : 0),
+                'folder' => true
+            );
         }
         return $output;
     }
