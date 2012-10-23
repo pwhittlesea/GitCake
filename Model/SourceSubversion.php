@@ -280,7 +280,7 @@ class SourceSubversion implements SourceControl {
             $revisions[] = (string) $entry['revision'];
         }
 
-        return $revisions;
+        return array_slice($revisions, $offset);
     }
 
     /**
