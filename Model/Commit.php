@@ -58,7 +58,7 @@ class Commit extends GitCakeAppModel {
 
             // Special case where folders are stored as changes in SVN
             try {
-                $this->engine->treeList($hash, $file);
+                $this->engine->getPathDetails($hash, $file);
                 $added = true;
             } catch (Exception $e) {
                 $added = false;
