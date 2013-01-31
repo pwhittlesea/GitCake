@@ -12,7 +12,8 @@
  * @since         GitCake v 1.1
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
+
 class RepoTypes {
-    const Git  = 1;
-    const Subversion = 2;
+	const GIT = 1;
+	const SVN = 2;
 }

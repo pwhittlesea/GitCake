@@ -1,5 +1,10 @@
 <?php
 /**
+ * GitCakeAppModel class.
+ * Parent class to Source objects containing common methods
+ *
+ * @extends AppModel
+ *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
@@ -13,12 +18,6 @@
 App::import("Vendor", "GitCake.UnifiedDiff", array("file"=>"UnifiedDiff/Diff.php"));
 App::uses("RepoTypes", "GitCake.Model");
 
-/**
- * GitCakeAppModel class.
- * Parent class to Source objects containing common methods
- *
- * @extends AppModel
- */
 class GitCakeAppModel extends AppModel {
 
     // The type of the current repo
@@ -27,14 +26,14 @@ class GitCakeAppModel extends AppModel {
     // The repository connector
     public $engine = null;
 
-    /**
-     * commitDetails function.
-     *
-     * @access protected
-     * @param mixed $hash
-     * @param bool $extended (default: false)
-     * @return void
-     */
+/**
+ * commitDetails function.
+ *
+ * @access protected
+ * @param mixed $hash
+ * @param bool $extended (default: false)
+ * @return void
+ */
     protected function commitDetails($hash, $extended = false) {
         $fields = array(
             'hash',
@@ -66,66 +65,67 @@ class GitCakeAppModel extends AppModel {
         return $commit;
     }
 
-    /**
-     * exists function.
-     *
-     * @access public
-     * @param mixed $blob (default: null)
-     * @return void
-     */
+/**
+ * exists function.
+ *
+ * @access public
+ * @param mixed $blob (default: null)
+ * @return void
+ */
     public function exists($blob = null) {
         return $this->engine->exists($blob);
     }
 
-    /**
-     * history function.
-     *
-     * @access public
-     * @param mixed $branch
-     * @param mixed $number
-     * @param mixed $offset
-     * @param string $file (default: '')
-     * @return void
-     */
+/**
+ * history function.
+ *
+ * @access public
+ * @param mixed $branch
+ * @param mixed $number
+ * @param mixed $offset
+ * @param string $file (default: '')
+ * @return void
+ */
     public function history($branch, $number, $offset, $file = '') {
         return $this->engine->revisionList($branch, $number, $offset, $file);
     }
 
-    /**
-     * getBranches function.
-     *
-     * @access public
-     * @return void
-     */
+/**
+ * getBranches function.
+ *
+ * @access public
+ * @return void
+ */
     public function getBranches() {
         return $this->engine->getBranches();
     }
 
-    /**
-     * getType function.
-     *
-     * @access public
-     * @return void
-     */
+/**
+ * getType function.
+ *
+ * @access public
+ * @return void
+ */
     public function getType() {
         return $this->engine->getType();
     }
 
-    /**
-     * open function.
-     *
-     * @access public
-     * @param mixed $repoType
-     * @param mixed $location (default: null)
-     * @return void
-     */
+/**
+ * open function.
+ *
+ * @access public
+ * @param mixed $repoType
+ * @param mixed $location (default: null)
+ * @throws Exception
+ * @return void
+ */
     public function open($repoType, $location = null) {
         $this->repoType = $repoType;
 
-        if ($this->repoType == RepoTypes::Git) {
+        if ($this->repoType == RepoTypes::GIT) {
             App::uses('SourceGit', 'GitCake.Model');
             $this->engine = new SourceGit();
-        } else if ($this->repoType == RepoTypes::Subversion) {
+        } else if ($this->repoType == RepoTypes::SVN) {
             App::uses('SourceSubversion', 'GitCake.Model');
             $this->engine = new SourceSubversion();
         } else {

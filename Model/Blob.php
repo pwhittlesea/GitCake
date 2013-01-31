@@ -14,27 +14,27 @@ App::uses('GitCakeAppModel', 'GitCake.Model');
 
 class Blob extends GitCakeAppModel {
 
-    /**
-     * lastChange function.
-     *
-     * @access private
-     * @param mixed $branch
-     * @param mixed $file
-     * @return void
-     */
+/**
+ * lastChange function.
+ *
+ * @access private
+ * @param mixed $branch
+ * @param mixed $file
+ * @return void
+ */
     private function lastChange($branch, $file) {
         $history = $this->history($branch, 1, 0, $file);
         return $this->commitDetails($history[0]);
     }
 
-    /**
-     * fetch function.
-     *
-     * @access public
-     * @param mixed $branch
-     * @param mixed $folderPath
-     * @return void
-     */
+/**
+ * fetch function.
+ *
+ * @access public
+ * @param mixed $branch
+ * @param mixed $folderPath
+ * @return void
+ */
     public function fetch($branch, $folderPath) {
         // Check the last character isnt a / otherwise git will return the contents of the folder
         if ($folderPath != '' && $folderPath[strlen($folderPath)-1] == '/') {
@@ -78,13 +78,13 @@ class Blob extends GitCakeAppModel {
         return $return;
     }
 
-    /**
-     * submodules function.
-     *
-     * @access public
-     * @param mixed $branch
-     * @return void
-     */
+/**
+ * submodules function.
+ *
+ * @access public
+ * @param mixed $branch
+ * @return void
+ */
     public function submodules($branch) {
         $resp = $this->fetch($branch, './.gitmodules');
 

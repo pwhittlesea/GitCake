@@ -14,26 +14,26 @@ App::uses('GitCakeAppModel', 'GitCake.Model');
 
 class Commit extends GitCakeAppModel {
 
-    /**
-     * fetch function.
-     *
-     * @access public
-     * @param mixed $commit
-     * @return void
-     */
+/**
+ * fetch function.
+ *
+ * @access public
+ * @param mixed $commit
+ * @return void
+ */
     public function fetch($commit) {
         return $this->commitDetails($commit, true);
     }
 
-    /**
-     * diff function.
-     *
-     * @access public
-     * @param mixed $hash
-     * @param mixed $parent
-     * @param string $file (default: '')
-     * @return void
-     */
+/**
+ * diff function.
+ *
+ * @access public
+ * @param mixed $hash
+ * @param mixed $parent
+ * @param string $file (default: '')
+ * @return void
+ */
     public function diff($hash, $parent, $file = '') {
         $output = $this->engine->getDiff($hash, $parent, $file);
 

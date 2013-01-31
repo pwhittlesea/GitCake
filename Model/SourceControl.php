@@ -1,5 +1,10 @@
 <?php
 /**
+ * SourceControl interface.
+ *
+ * Ensures that all source control interfaces
+ * will be able to be probed in a standard way.
+ *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
@@ -10,12 +15,6 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-/**
- * SourceControl interface.
- *
- * Ensures that all source control interfaces
- * will be able to be probed in a standard way.
- */
 interface SourceControl {
     public static function create($base, $mode, $shared);
 

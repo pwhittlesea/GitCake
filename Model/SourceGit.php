@@ -1,5 +1,10 @@
 <?php
 /**
+ * SourceGit class.
+ * Connector for Git
+ *
+ * @implements SourceControl
+ *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  *
@@ -13,16 +18,10 @@
 App::uses('SourceControl', 'GitCake.Model');
 App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
 
-/**
- * SourceGit class.
- * Connector for Git
- *
- * @implements SourceControl
- */
 class SourceGit implements SourceControl {
 
     public $repo = null;
-    public $type = RepoTypes::Git;
+    public $type = RepoTypes::GIT;
     private $branches = array();
 
     // This is security by obscurity for now
@@ -44,13 +43,13 @@ class SourceGit implements SourceControl {
         ),
     );
 
-    /**
-     * constructMetadataString function.
-     *
-     * @access private
-     * @param mixed $fields
-     * @return void
-     */
+/**
+ * constructMetadataString function.
+ *
+ * @access private
+ * @param mixed $fields
+ * @return void
+ */
     private function constructMetadataString($fields) {
         if (!is_array($fields)) {
             $fields = array($fields);
@@ -69,13 +68,13 @@ class SourceGit implements SourceControl {
         return $str;
     }
 
-    /**
-     * constructMetadataRegex function.
-     *
-     * @access private
-     * @param mixed $fields
-     * @return void
-     */
+/**
+ * constructMetadataRegex function.
+ *
+ * @access private
+ * @param mixed $fields
+ * @return void
+ */
     private function constructMetadataRegex($fields) {
         if (!is_array($fields)) {
             $fields = array($fields);
@@ -94,29 +93,29 @@ class SourceGit implements SourceControl {
         return "#^$reg$#";
     }
 
-    /**
-     * exec function.
-     *
-     * @access private
-     * @param mixed $command
-     * @return void
-     */
+/**
+ * exec function.
+ *
+ * @access private
+ * @param mixed $command
+ * @return void
+ */
     private function exec($command) {
         // debug("git $command");
         return trim($this->repo->run($command));
     }
 
-    /**
-     * create function.
-     * Create a repo at a location
-     *
-     * @access public
-     * @static
-     * @param mixed $base (default: null) the path to use
-     * @param mixed $mode (default: null) the permissions mode to set on the repository (supports chmod-style arguments e.g. g+rwX, 0750)
-     * @param bool $shared (default: false) the 'shared' option as per git init - (false|true|umask|group|all|world|everybody|0xxx)
-     * @return void
-     */
+/**
+ * create function.
+ * Create a repo at a location
+ *
+ * @access public
+ * @static
+ * @param mixed $base (default: null) the path to use
+ * @param mixed $mode (default: null) the permissions mode to set on the repository (supports chmod-style arguments e.g. g+rwX, 0750)
+ * @param bool $shared (default: false) the 'shared' option as per git init - (false|true|umask|group|all|world|everybody|0xxx)
+ * @return void
+ */
     public static function create($base = null, $mode = null, $shared = false) {
         if ($base == null) return null;
 
@@ -142,35 +141,35 @@ class SourceGit implements SourceControl {
         return true;
     }
 
-    /**
-     * exists function.
-     *
-     * @access public
-     * @param mixed $blob (default: null)
-     * @return void
-     */
+/**
+ * exists function.
+ *
+ * @access public
+ * @param mixed $blob (default: null)
+ * @return void
+ */
     public function exists($hash = null) {
         return $this->exec("rev-parse $hash");
     }
 
-    /**
-     * getBranches function.
-     *
-     * @access public
-     * @return void
-     */
+/**
+ * getBranches function.
+ *
+ * @access public
+ * @return void
+ */
     public function getBranches() {
         return $this->branches;
     }
 
-    /**
-     * getCommitMetadata function.
-     *
-     * @access public
-     * @param mixed $hash
-     * @param mixed $metadata
-     * @return void
-     */
+/**
+ * getCommitMetadata function.
+ *
+ * @access public
+ * @param mixed $hash
+ * @param mixed $metadata
+ * @return void
+ */
     public function getCommitMetadata($hash, $metadata) {
         $metadataString = $this->constructMetadataString($metadata);
         $metadataRegex = $this->constructMetadataRegex($metadata);
@@ -195,14 +194,14 @@ class SourceGit implements SourceControl {
         return $return;
     }
 
-    /**
-     * getChangedFiles function.
-     *
-     * @access public
-     * @param mixed $hash
-     * @param mixed $parent
-     * @return void
-     */
+/**
+ * getChangedFiles function.
+ *
+ * @access public
+ * @param mixed $hash
+ * @param mixed $parent
+ * @return void
+ */
     public function getChangedFiles($hash, $parent) {
         if ($parent == null || $parent == '') {
             $parent = '--root';
@@ -213,15 +212,15 @@ class SourceGit implements SourceControl {
         return preg_split('/[\r\n]+/', $changes);
     }
 
-    /**
-     * getDiff function.
-     *
-     * @access public
-     * @param mixed $hash
-     * @param mixed $parent
-     * @param string $file (default: '')
-     * @return void
-     */
+/**
+ * getDiff function.
+ *
+ * @access public
+ * @param mixed $hash
+ * @param mixed $parent
+ * @param string $file (default: '')
+ * @return void
+ */
     public function getDiff($hash, $parent, $file = '') {
         if ($parent == null || $parent == '') {
             $parent = '--root';
@@ -234,14 +233,14 @@ class SourceGit implements SourceControl {
         return $this->exec("diff-tree --cc $parent $hash $fileName");
     }
 
-    /**
-     * getPathDetails function.
-     *
-     * @access public
-     * @param mixed $branch
-     * @param mixed $path
-     * @return void
-     */
+/**
+ * getPathDetails function.
+ *
+ * @access public
+ * @param mixed $branch
+ * @param mixed $path
+ * @return void
+ */
     public function getPathDetails($branch, $path) {
         // Check the last character isnt a / otherwise git will return the contents of the folder
         if ($path != '' && $path[strlen($path)-1] == '/') {
@@ -268,23 +267,23 @@ class SourceGit implements SourceControl {
         );
     }
 
-    /**
-     * getType function.
-     *
-     * @access public
-     * @return void
-     */
+/**
+ * getType function.
+ *
+ * @access public
+ * @return void
+ */
     public function getType() {
         return $this->type;
     }
 
-    /**
-     * open function.
-     *
-     * @access public
-     * @param mixed $location
-     * @return void
-     */
+/**
+ * open function.
+ *
+ * @access public
+ * @param mixed $location
+ * @return void
+ */
     public function open($location) {
         $this->repo = Git::open($location);
 
@@ -297,39 +296,39 @@ class SourceGit implements SourceControl {
         return $this->repo;
     }
 
-    /**
-     * revisionList function.
-     *
-     * @access public
-     * @param mixed $branch
-     * @param mixed $number
-     * @param mixed $offset
-     * @param string $file (default: '')
-     * @return void
-     */
+/**
+ * revisionList function.
+ *
+ * @access public
+ * @param mixed $branch
+ * @param mixed $number
+ * @param mixed $offset
+ * @param string $file (default: '')
+ * @return void
+ */
     public function revisionList($branch, $number, $offset, $file = '') {
         return explode("\n", $this->exec("rev-list -n $number --skip=$offset $branch -- $file"));
     }
 
-    /**
-     * show function.
-     *
-     * @access public
-     * @param mixed $hash
-     * @return void
-     */
+/**
+ * show function.
+ *
+ * @access public
+ * @param mixed $hash
+ * @return void
+ */
     public function show($hash) {
         return $this->exec("show $hash");
     }
 
-    /**
-     * treeList function.
-     *
-     * @access public
-     * @param mixed $branch
-     * @param string $folderPath (default: '')
-     * @return void
-     */
+/**
+ * treeList function.
+ *
+ * @access public
+ * @param mixed $branch
+ * @param string $folderPath (default: '')
+ * @return void
+ */
     public function treeList($branch, $folderPath = '') {
         $contents = array();
 
