@@ -20,11 +20,11 @@ App::uses("RepoTypes", "GitCake.Model");
 
 class GitCakeAppModel extends AppModel {
 
-    // The type of the current repo
-    public $repoType = 1;
+	// The type of the current repo
+	public $repoType = 1;
 
-    // The repository connector
-    public $engine = null;
+	// The repository connector
+	public $engine = null;
 
 /**
  * commitDetails function.
@@ -34,36 +34,36 @@ class GitCakeAppModel extends AppModel {
  * @param bool $extended (default: false)
  * @return void
  */
-    protected function commitDetails($hash, $extended = false) {
-        $fields = array(
-            'hash',
-            'subject',
-            'date',
-            'author',
-        );
+	protected function commitDetails($hash, $extended = false) {
+		$fields = array(
+			'hash',
+			'subject',
+			'date',
+			'author',
+		);
 
-        if ($extended) {
-            $fields[] = 'abbv';
-            $fields[] = 'body';
-            $fields[] = 'notes';
-            $fields[] = 'parent';
-        }
+		if ($extended) {
+			$fields[] = 'abbv';
+			$fields[] = 'body';
+			$fields[] = 'notes';
+			$fields[] = 'parent';
+		}
 
-        $commit = $this->engine->getCommitMetadata($hash, $fields);
+		$commit = $this->engine->getCommitMetadata($hash, $fields);
 
-        if ($extended) {
-            // For now we are ignoring multiple parents
-            $parents = preg_split('/\s+/', $commit['parent']);
-            if (isset($parents[0]) && $parents[0] != '') {
-                $commit['parent'] = $parents[0];
-            } else if ($parents[0] == '') {
-                $commit['parent'] = null;
-            }
-            $commit['changeset'] = $this->engine->getChangedFiles($hash, $commit['parent']);
-        }
+		if ($extended) {
+			// For now we are ignoring multiple parents
+			$parents = preg_split('/\s+/', $commit['parent']);
+			if (isset($parents[0]) && $parents[0] != '') {
+				$commit['parent'] = $parents[0];
+			} else if ($parents[0] == '') {
+				$commit['parent'] = null;
+			}
+			$commit['changeset'] = $this->engine->getChangedFiles($hash, $commit['parent']);
+		}
 
-        return $commit;
-    }
+		return $commit;
+	}
 
 /**
  * exists function.
@@ -72,9 +72,9 @@ class GitCakeAppModel extends AppModel {
  * @param mixed $blob (default: null)
  * @return void
  */
-    public function exists($blob = null) {
-        return $this->engine->exists($blob);
-    }
+	public function exists($blob = null) {
+		return $this->engine->exists($blob);
+	}
 
 /**
  * history function.
@@ -86,9 +86,9 @@ class GitCakeAppModel extends AppModel {
  * @param string $file (default: '')
  * @return void
  */
-    public function history($branch, $number, $offset, $file = '') {
-        return $this->engine->revisionList($branch, $number, $offset, $file);
-    }
+	public function history($branch, $number, $offset, $file = '') {
+		return $this->engine->revisionList($branch, $number, $offset, $file);
+	}
 
 /**
  * getBranches function.
@@ -96,9 +96,9 @@ class GitCakeAppModel extends AppModel {
  * @access public
  * @return void
  */
-    public function getBranches() {
-        return $this->engine->getBranches();
-    }
+	public function getBranches() {
+		return $this->engine->getBranches();
+	}
 
 /**
  * getType function.
@@ -106,9 +106,9 @@ class GitCakeAppModel extends AppModel {
  * @access public
  * @return void
  */
-    public function getType() {
-        return $this->engine->getType();
-    }
+	public function getType() {
+		return $this->engine->getType();
+	}
 
 /**
  * open function.
@@ -119,20 +119,20 @@ class GitCakeAppModel extends AppModel {
  * @throws Exception
  * @return void
  */
-    public function open($repoType, $location = null) {
-        $this->repoType = $repoType;
+	public function open($repoType, $location = null) {
+		$this->repoType = $repoType;
 
-        if ($this->repoType == RepoTypes::GIT) {
-            App::uses('SourceGit', 'GitCake.Model');
-            $this->engine = new SourceGit();
-        } else if ($this->repoType == RepoTypes::SVN) {
-            App::uses('SourceSubversion', 'GitCake.Model');
-            $this->engine = new SourceSubversion();
-        } else {
-            throw new Exception("Repository Type Unknown");
-        }
+		if ($this->repoType == RepoTypes::GIT) {
+			App::uses('SourceGit', 'GitCake.Model');
+			$this->engine = new SourceGit();
+		} else if ($this->repoType == RepoTypes::SVN) {
+			App::uses('SourceSubversion', 'GitCake.Model');
+			$this->engine = new SourceSubversion();
+		} else {
+			throw new Exception("Repository Type Unknown");
+		}
 
-        $this->engine->open($location);
-    }
+		$this->engine->open($location);
+	}
 
 }

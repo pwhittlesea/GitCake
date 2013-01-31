@@ -22,10 +22,10 @@ class Blob extends GitCakeAppModel {
  * @param mixed $file
  * @return void
  */
-    private function lastChange($branch, $file) {
-        $history = $this->history($branch, 1, 0, $file);
-        return $this->commitDetails($history[0]);
-    }
+	private function lastChange($branch, $file) {
+		$history = $this->history($branch, 1, 0, $file);
+		return $this->commitDetails($history[0]);
+	}
 
 /**
  * fetch function.
@@ -35,48 +35,48 @@ class Blob extends GitCakeAppModel {
  * @param mixed $folderPath
  * @return void
  */
-    public function fetch($branch, $folderPath) {
-        // Check the last character isnt a / otherwise git will return the contents of the folder
-        if ($folderPath != '' && $folderPath[strlen($folderPath)-1] == '/') {
-            $folderPath = substr($folderPath, 0, strlen($folderPath)-1);
-        }
+	public function fetch($branch, $folderPath) {
+		// Check the last character isnt a / otherwise git will return the contents of the folder
+		if ($folderPath != '' && $folderPath[strlen($folderPath)-1] == '/') {
+			$folderPath = substr($folderPath, 0, strlen($folderPath)-1);
+		}
 
-        // Lets start from the base of the repo
-        if ($folderPath == '') {
-            $folderPath = '.';
-        }
+		// Lets start from the base of the repo
+		if ($folderPath == '') {
+			$folderPath = '.';
+		}
 
-        $current = $this->engine->getPathDetails($branch, $folderPath);
+		$current = $this->engine->getPathDetails($branch, $folderPath);
 
-        if ($current == null) {
-            return array('type' => 'invalid');
-        }
+		if ($current == null) {
+			return array('type' => 'invalid');
+		}
 
-        // Init standard return array
-        $return = array(
-            'type'    => $current['type'],
-            'content' => '',
-            'path'    => $folderPath,
-            'commit'  => $this->commitDetails($branch)
-        );
+		// Init standard return array
+		$return = array(
+			'type' => $current['type'],
+			'content' => '',
+			'path' => $folderPath,
+			'commit' => $this->commitDetails($branch)
+		);
 
-        if ($current['type'] == 'blob') {
-            $return['content'] = $this->engine->show($current['hash']);
-            $return['updated'] = $this->lastChange($branch, $current['name']);
-        } else if ($current['type'] == 'tree') {
-            $return['content'] = $this->engine->treeList($branch, "$folderPath/");
+		if ($current['type'] == 'blob') {
+			$return['content'] = $this->engine->show($current['hash']);
+			$return['updated'] = $this->lastChange($branch, $current['name']);
+		} else if ($current['type'] == 'tree') {
+			$return['content'] = $this->engine->treeList($branch, "$folderPath/");
 
-            foreach ($return['content'] as $a => $file) {
-                $return['content'][$a]['updated'] = $this->lastChange($branch, $file['path']);
+			foreach ($return['content'] as $a => $file) {
+				$return['content'][$a]['updated'] = $this->lastChange($branch, $file['path']);
 
-                if ($file['type'] == 'commit') {
-                    $submodules = (!isset($submodules)) ? $this->submodules($branch) : $submodules;
-                    $return['content'][$a]['remote'] = (isset($submodules[$file['name']])) ? $submodules[$file['name']]['remote'] : '';
-                }
-            }
-        }
-        return $return;
-    }
+				if ($file['type'] == 'commit') {
+					$submodules = (!isset($submodules)) ? $this->submodules($branch) : $submodules;
+					$return['content'][$a]['remote'] = (isset($submodules[$file['name']])) ? $submodules[$file['name']]['remote'] : '';
+				}
+			}
+		}
+		return $return;
+	}
 
 /**
  * submodules function.
@@ -85,30 +85,30 @@ class Blob extends GitCakeAppModel {
  * @param mixed $branch
  * @return void
  */
-    public function submodules($branch) {
-        $resp = $this->fetch($branch, './.gitmodules');
+	public function submodules($branch) {
+		$resp = $this->fetch($branch, './.gitmodules');
 
-        $sub = array();
+		$sub = array();
 
-        if (!isset($resp['content'])) {
-            return $sub;
-        }
-        preg_match_all('#\[submodule\s+[\"\'](?P<name>\S*)[\"\']\]\s+path\s=\s(?P<path>\S+)\s+url\s=\s(?P<remote>\S+)#', $resp['content'], $matches);
+		if (!isset($resp['content'])) {
+			return $sub;
+		}
+		preg_match_all('#\[submodule\s+[\"\'](?P<name>\S*)[\"\']\]\s+path\s=\s(?P<path>\S+)\s+url\s=\s(?P<remote>\S+)#', $resp['content'], $matches);
 
-        // Just incase there are no submodules
-        if (empty($matches)) {
-            return $sub;
-        }
+		// Just incase there are no submodules
+		if (empty($matches)) {
+			return $sub;
+		}
 
-        foreach ($matches['name'] as $i => $name) {
-            preg_match('#(?P<protocol>(git|http)://|git@)(?P<url>\S+)#', $matches['remote'][$i], $remote);
-            if ($remote['protocol'] == 'git@') {
-                $remote['url'] = str_replace(':', '/', $remote['url']);
-            }
+		foreach ($matches['name'] as $i => $name) {
+			preg_match('#(?P<protocol>(git|http)://|git@)(?P<url>\S+)#', $matches['remote'][$i], $remote);
+			if ($remote['protocol'] == 'git@') {
+				$remote['url'] = str_replace(':', '/', $remote['url']);
+			}
 
-            $sub[$matches['path'][$i]] = array('name'=>$matches['name'][$i], 'remote'=>$remote['url']);
-        }
-        return $sub;
-    }
+			$sub[$matches['path'][$i]] = array('name'=>$matches['name'][$i], 'remote'=>$remote['url']);
+		}
+		return $sub;
+	}
 
 }

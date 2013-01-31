@@ -20,28 +20,28 @@ App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
 
 class SourceGit implements SourceControl {
 
-    public $repo = null;
-    public $type = RepoTypes::GIT;
-    private $branches = array();
+	public $repo = null;
+	public $type = RepoTypes::GIT;
+	private $branches = array();
 
-    // This is security by obscurity for now
-    private $md1 = '{@{';
-    private $md2 = '}@}';
-    private $mRx = '[\s\S]*';
+	// This is security by obscurity for now
+	private $md1 = '{@{';
+	private $md2 = '}@}';
+	private $mRx = '[\s\S]*';
 
-    private $metaDataMappings = array(
-        'hash'    => '%H',
-        'subject' => '%s',
-        'date'    => '%ci',
-        'abbv'    => '%h',
-        'body'    => '%b',
-        'notes'   => '%N',
-        'parent'  => '%P',
-        'author'  => array(
-            'name'  => '%cn',
-            'email' => '%ce',
-        ),
-    );
+	private $metaDataMappings = array(
+		'hash' => '%H',
+		'subject' => '%s',
+		'date' => '%ci',
+		'abbv' => '%h',
+		'body' => '%b',
+		'notes' => '%N',
+		'parent' => '%P',
+		'author' => array(
+			'name' => '%cn',
+			'email' => '%ce',
+		),
+	);
 
 /**
  * constructMetadataString function.
@@ -50,23 +50,23 @@ class SourceGit implements SourceControl {
  * @param mixed $fields
  * @return void
  */
-    private function constructMetadataString($fields) {
-        if (!is_array($fields)) {
-            $fields = array($fields);
-        }
-        $str = "";
-        foreach ($fields as $field) {
-            $mapping = $this->metaDataMappings[$field];
-            if (is_array($mapping)) {
-                foreach ($mapping as $mp) {
-                    $str .= "{$this->md1}{$mp}{$this->md2}";
-                }
-            } else {
-                $str .= "{$this->md1}{$mapping}{$this->md2}";
-            }
-        }
-        return $str;
-    }
+	private function constructMetadataString($fields) {
+		if (!is_array($fields)) {
+			$fields = array($fields);
+		}
+		$str = "";
+		foreach ($fields as $field) {
+			$mapping = $this->metaDataMappings[$field];
+			if (is_array($mapping)) {
+				foreach ($mapping as $mp) {
+					$str .= "{$this->md1}{$mp}{$this->md2}";
+				}
+			} else {
+				$str .= "{$this->md1}{$mapping}{$this->md2}";
+			}
+		}
+		return $str;
+	}
 
 /**
  * constructMetadataRegex function.
@@ -75,23 +75,23 @@ class SourceGit implements SourceControl {
  * @param mixed $fields
  * @return void
  */
-    private function constructMetadataRegex($fields) {
-        if (!is_array($fields)) {
-            $fields = array($fields);
-        }
-        $reg = "";
-        foreach ($fields as $field) {
-            $mapping = $this->metaDataMappings[$field];
-            if (is_array($mapping)) {
-                foreach ($mapping as $name => $mp) {
-                    $reg .= "{$this->md1}(?P<{$name}>{$this->mRx}){$this->md2}";
-                }
-            } else {
-                $reg .= "{$this->md1}(?P<{$field}>{$this->mRx}){$this->md2}";
-            }
-        }
-        return "#^$reg$#";
-    }
+	private function constructMetadataRegex($fields) {
+		if (!is_array($fields)) {
+			$fields = array($fields);
+		}
+		$reg = "";
+		foreach ($fields as $field) {
+			$mapping = $this->metaDataMappings[$field];
+			if (is_array($mapping)) {
+				foreach ($mapping as $name => $mp) {
+					$reg .= "{$this->md1}(?P<{$name}>{$this->mRx}){$this->md2}";
+				}
+			} else {
+				$reg .= "{$this->md1}(?P<{$field}>{$this->mRx}){$this->md2}";
+			}
+		}
+		return "#^$reg$#";
+	}
 
 /**
  * exec function.
@@ -100,10 +100,10 @@ class SourceGit implements SourceControl {
  * @param mixed $command
  * @return void
  */
-    private function exec($command) {
-        // debug("git $command");
-        return trim($this->repo->run($command));
-    }
+	private function exec($command) {
+		// debug("git $command");
+		return trim($this->repo->run($command));
+	}
 
 /**
  * create function.
@@ -116,30 +116,30 @@ class SourceGit implements SourceControl {
  * @param bool $shared (default: false) the 'shared' option as per git init - (false|true|umask|group|all|world|everybody|0xxx)
  * @return void
  */
-    public static function create($base = null, $mode = null, $shared = false) {
-        if ($base == null) return null;
+	public static function create($base = null, $mode = null, $shared = false) {
+		if ($base == null) return null;
 
-        if(!preg_match('/^([0-9]+)|([ugoa]+[+-=][rwxX]+)$/', $mode)){
-            $mode = null;
-        }
+		if(!preg_match('/^([0-9]+)|([ugoa]+[+-=][rwxX]+)$/', $mode)){
+			$mode = null;
+		}
 
-        if (!file_exists($base)) {
-            mkdir($base, 0777);
-        }
+		if (!file_exists($base)) {
+			mkdir($base, 0777);
+		}
 
-        // Note that $shared is sanitised within the Git class
-        Git::create($base, null, true, $shared);
+		// Note that $shared is sanitised within the Git class
+		Git::create($base, null, true, $shared);
 
-        // Ensure the permissions are set correctly, e.g. so the git group can have write access.
-        // No recursive chmod() in PHP.  Ahead fudge factor 3.
-        // TODO could be replaced with a lot of extra code to recurse down
-        // the directory tree, if there's a reason to (safe mode?)
-        if($mode != null){
-            system('chmod -R ' . escapeshellarg($mode) . ' ' . escapeshellarg($base));
-        }
+		// Ensure the permissions are set correctly, e.g. so the git group can have write access.
+		// No recursive chmod() in PHP.	 Ahead fudge factor 3.
+		// TODO could be replaced with a lot of extra code to recurse down
+		// the directory tree, if there's a reason to (safe mode?)
+		if($mode != null){
+			system('chmod -R ' . escapeshellarg($mode) . ' ' . escapeshellarg($base));
+		}
 
-        return true;
-    }
+		return true;
+	}
 
 /**
  * exists function.
@@ -148,9 +148,9 @@ class SourceGit implements SourceControl {
  * @param mixed $blob (default: null)
  * @return void
  */
-    public function exists($hash = null) {
-        return $this->exec("rev-parse $hash");
-    }
+	public function exists($hash = null) {
+		return $this->exec("rev-parse $hash");
+	}
 
 /**
  * getBranches function.
@@ -158,9 +158,9 @@ class SourceGit implements SourceControl {
  * @access public
  * @return void
  */
-    public function getBranches() {
-        return $this->branches;
-    }
+	public function getBranches() {
+		return $this->branches;
+	}
 
 /**
  * getCommitMetadata function.
@@ -170,29 +170,29 @@ class SourceGit implements SourceControl {
  * @param mixed $metadata
  * @return void
  */
-    public function getCommitMetadata($hash, $metadata) {
-        $metadataString = $this->constructMetadataString($metadata);
-        $metadataRegex = $this->constructMetadataRegex($metadata);
+	public function getCommitMetadata($hash, $metadata) {
+		$metadataString = $this->constructMetadataString($metadata);
+		$metadataRegex = $this->constructMetadataRegex($metadata);
 
-        $result = $this->exec("--no-pager show -s --format='{$metadataString}' $hash");
+		$result = $this->exec("--no-pager show -s --format='{$metadataString}' $hash");
 
-        preg_match($metadataRegex, $result, $result);
+		preg_match($metadataRegex, $result, $result);
 
-        $return = array();
+		$return = array();
 
-        foreach ($metadata as $field) {
-            if (is_array($this->metaDataMappings[$field])) {
-                $return[$field] = array();
-                foreach($this->metaDataMappings[$field] as $k => $v) {
-                    $return[$field][$k] = $result[$k];
-                }
-            } else {
-                $return[$field] = $result[$field];
-            }
-        }
+		foreach ($metadata as $field) {
+			if (is_array($this->metaDataMappings[$field])) {
+				$return[$field] = array();
+				foreach($this->metaDataMappings[$field] as $k => $v) {
+					$return[$field][$k] = $result[$k];
+				}
+			} else {
+				$return[$field] = $result[$field];
+			}
+		}
 
-        return $return;
-    }
+		return $return;
+	}
 
 /**
  * getChangedFiles function.
@@ -202,15 +202,15 @@ class SourceGit implements SourceControl {
  * @param mixed $parent
  * @return void
  */
-    public function getChangedFiles($hash, $parent) {
-        if ($parent == null || $parent == '') {
-            $parent = '--root';
-        }
-        $changes = $this->exec("diff-tree --name-only -r $parent $hash");
+	public function getChangedFiles($hash, $parent) {
+		if ($parent == null || $parent == '') {
+			$parent = '--root';
+		}
+		$changes = $this->exec("diff-tree --name-only -r $parent $hash");
 
-        $changes = str_replace("$hash\n", '', $changes);
-        return preg_split('/[\r\n]+/', $changes);
-    }
+		$changes = str_replace("$hash\n", '', $changes);
+		return preg_split('/[\r\n]+/', $changes);
+	}
 
 /**
  * getDiff function.
@@ -221,17 +221,17 @@ class SourceGit implements SourceControl {
  * @param string $file (default: '')
  * @return void
  */
-    public function getDiff($hash, $parent, $file = '') {
-        if ($parent == null || $parent == '') {
-            $parent = '--root';
-        }
-        if ($file != '') {
-            $fileName = "-- $file";
-        } else {
-            $fileName = '';
-        }
-        return $this->exec("diff-tree --cc $parent $hash $fileName");
-    }
+	public function getDiff($hash, $parent, $file = '') {
+		if ($parent == null || $parent == '') {
+			$parent = '--root';
+		}
+		if ($file != '') {
+			$fileName = "-- $file";
+		} else {
+			$fileName = '';
+		}
+		return $this->exec("diff-tree --cc $parent $hash $fileName");
+	}
 
 /**
  * getPathDetails function.
@@ -241,31 +241,31 @@ class SourceGit implements SourceControl {
  * @param mixed $path
  * @return void
  */
-    public function getPathDetails($branch, $path) {
-        // Check the last character isnt a / otherwise git will return the contents of the folder
-        if ($path != '' && $path[strlen($path)-1] == '/') {
-            $path = substr($path, 0, strlen($path)-1);
-        }
+	public function getPathDetails($branch, $path) {
+		// Check the last character isnt a / otherwise git will return the contents of the folder
+		if ($path != '' && $path[strlen($path)-1] == '/') {
+			$path = substr($path, 0, strlen($path)-1);
+		}
 
-        if ($path == '.' || $path == '') {
-            return array(
-                'hash' => $branch,
-                'name' => $branch,
-                'type' => 'tree',
-                'permissions' => '0'
-            );
-        }
+		if ($path == '.' || $path == '') {
+			return array(
+				'hash' => $branch,
+				'name' => $branch,
+				'type' => 'tree',
+				'permissions' => '0'
+			);
+		}
 
-        if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $this->exec("ls-tree $branch -- $path"), $details)) {
-            return null;
-        }
-        return array(
-            'hash' => $details['hash'],
-            'name' => $details['name'],
-            'type' => $details['type'],
-            'permissions' => $details['permissions']
-        );
-    }
+		if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $this->exec("ls-tree $branch -- $path"), $details)) {
+			return null;
+		}
+		return array(
+			'hash' => $details['hash'],
+			'name' => $details['name'],
+			'type' => $details['type'],
+			'permissions' => $details['permissions']
+		);
+	}
 
 /**
  * getType function.
@@ -273,9 +273,9 @@ class SourceGit implements SourceControl {
  * @access public
  * @return void
  */
-    public function getType() {
-        return $this->type;
-    }
+	public function getType() {
+		return $this->type;
+	}
 
 /**
  * open function.
@@ -284,17 +284,17 @@ class SourceGit implements SourceControl {
  * @param mixed $location
  * @return void
  */
-    public function open($location) {
-        $this->repo = Git::open($location);
+	public function open($location) {
+		$this->repo = Git::open($location);
 
-        foreach (explode("\n", $this->exec('branch')) as $value) {
-            if (preg_match('/^\*? +(?P<name>\S+)/', $value, $matches)) {
-                $this->branches[] = $matches['name'];
-            }
-        }
+		foreach (explode("\n", $this->exec('branch')) as $value) {
+			if (preg_match('/^\*? +(?P<name>\S+)/', $value, $matches)) {
+				$this->branches[] = $matches['name'];
+			}
+		}
 
-        return $this->repo;
-    }
+		return $this->repo;
+	}
 
 /**
  * revisionList function.
@@ -306,9 +306,9 @@ class SourceGit implements SourceControl {
  * @param string $file (default: '')
  * @return void
  */
-    public function revisionList($branch, $number, $offset, $file = '') {
-        return explode("\n", $this->exec("rev-list -n $number --skip=$offset $branch -- $file"));
-    }
+	public function revisionList($branch, $number, $offset, $file = '') {
+		return explode("\n", $this->exec("rev-list -n $number --skip=$offset $branch -- $file"));
+	}
 
 /**
  * show function.
@@ -317,9 +317,9 @@ class SourceGit implements SourceControl {
  * @param mixed $hash
  * @return void
  */
-    public function show($hash) {
-        return $this->exec("show $hash");
-    }
+	public function show($hash) {
+		return $this->exec("show $hash");
+	}
 
 /**
  * treeList function.
@@ -329,21 +329,21 @@ class SourceGit implements SourceControl {
  * @param string $folderPath (default: '')
  * @return void
  */
-    public function treeList($branch, $folderPath = '') {
-        $contents = array();
+	public function treeList($branch, $folderPath = '') {
+		$contents = array();
 
-        foreach (explode("\n", $this->exec("ls-tree $branch -- $folderPath")) as $a => $file) {
-            if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $file, $matches)) {
-                $contents[$a] = array(
-                    'permissions' => $matches['permissions'],
-                    'type'        => $matches['type'],
-                    'hash'        => $matches['hash'],
-                    'path'        => $matches['name'],
-                    'name'        => str_replace("$folderPath", "", $matches['name'])
-                );
-            }
-        }
+		foreach (explode("\n", $this->exec("ls-tree $branch -- $folderPath")) as $a => $file) {
+			if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $file, $matches)) {
+				$contents[$a] = array(
+					'permissions' => $matches['permissions'],
+					'type' => $matches['type'],
+					'hash' => $matches['hash'],
+					'path' => $matches['name'],
+					'name' => str_replace("$folderPath", "", $matches['name'])
+				);
+			}
+		}
 
-        return $contents;
-    }
+		return $contents;
+	}
 }
