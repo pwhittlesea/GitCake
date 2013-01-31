@@ -11,6 +11,7 @@
  */
 
 App::import("Vendor", "GitCake.UnifiedDiff", array("file"=>"UnifiedDiff/Diff.php"));
+App::uses("RepoTypes", "GitCake.Model");
 
 /**
  * GitCakeAppModel class.
@@ -134,13 +135,4 @@ class GitCakeAppModel extends AppModel {
         $this->engine->open($location);
     }
 
-}
-
-/**
- * RepoTypes class.
- * Provides constants for repo type comparison.
- */
-class RepoTypes {
-    const Git  = 1;
-    const Subversion = 2;
 }
