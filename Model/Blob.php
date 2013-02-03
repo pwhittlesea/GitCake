@@ -71,7 +71,7 @@ class Blob extends GitCakeAppModel {
 
 				if ($file['type'] == 'commit') {
 					$submodules = (!isset($submodules)) ? $this->submodules($branch) : $submodules;
-					$return['content'][$a]['remote'] = (isset($submodules[$file['name']])) ? $submodules[$file['name']]['remote'] : '';
+					$return['content'][$a]['remote'] = (isset($submodules[$file['path']])) ? $submodules[$file['path']]['remote'] : '';
 				}
 			}
 		}
@@ -95,13 +95,8 @@ class Blob extends GitCakeAppModel {
 		}
 		preg_match_all('#\[submodule\s+[\"\'](?P<name>\S*)[\"\']\]\s+path\s=\s(?P<path>\S+)\s+url\s=\s(?P<remote>\S+)#', $resp['content'], $matches);
 
-		// Just incase there are no submodules
-		if (empty($matches)) {
-			return $sub;
-		}
-
 		foreach ($matches['name'] as $i => $name) {
-			preg_match('#(?P<protocol>(git|http)://|git@)(?P<url>\S+)#', $matches['remote'][$i], $remote);
+			preg_match('#(?P<protocol>(git|https?)://|git@)(?P<url>\S+)#', $matches['remote'][$i], $remote);
 			if ($remote['protocol'] == 'git@') {
 				$remote['url'] = str_replace(':', '/', $remote['url']);
 			}

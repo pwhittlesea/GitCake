@@ -122,16 +122,29 @@ class GitCakeAppModel extends AppModel {
 	public function open($repoType, $location = null) {
 		$this->repoType = $repoType;
 
-		if ($this->repoType == RepoTypes::GIT) {
-			App::uses('SourceGit', 'GitCake.Model');
-			$this->engine = new SourceGit();
-		} else if ($this->repoType == RepoTypes::SVN) {
-			App::uses('SourceSubversion', 'GitCake.Model');
-			$this->engine = new SourceSubversion();
-		} else {
-			throw new Exception("Repository Type Unknown");
+		switch ($this->repoType) {
+			case RepoTypes::GIT:
+				App::uses('SourceGit', 'GitCake.Model');
+				$this->openEngine(new SourceGit(), $location);
+				break;
+			case RepoTypes::SVN:
+				App::uses('SourceSubversion', 'GitCake.Model');
+				$this->openEngine(new SourceSubversion(), $location);
+				break;
+			default:
+				throw new Exception("Repository Type Unknown");
 		}
+	}
 
+/**
+ * openEngine function.
+ *
+ * @access public
+ * @param mixed $engine the new engine
+ * @return void
+ */
+	public function openEngine($engine, $location) {
+		$this->engine = $engine;
 		$this->engine->open($location);
 	}
 
