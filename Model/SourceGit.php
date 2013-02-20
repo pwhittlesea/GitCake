@@ -16,7 +16,8 @@
  */
 
 App::uses('SourceControl', 'GitCake.Model');
-App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
+App::uses('RepoTypes', 'GitCake.Model');
+App::import("Vendor", "GitCake.Git", array("file"=>"Git" . DS . "Git.php"));
 
 class SourceGit extends SourceControl {
 

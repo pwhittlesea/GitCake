@@ -6,10 +6,13 @@
 class AllTestsTest extends PHPUnit_Framework_TestSuite {
 
 	public static function suite() {
+		$suite = new PHPUnit_Framework_TestSuite('All Tests');
+
 		$path = App::pluginPath('GitCake') . 'Test' . DS . 'Case' . DS;
 
-		$suite = new CakeTestSuite('All tests');
-		$suite->addTestDirectoryRecursive($path . 'Model' . DS);
+		$suite->addTestFile($path . 'Model' . DS . 'BlobTest.php');
+		$suite->addTestFile($path . 'Model' . DS . 'CommitTest.php');
+		$suite->addTestFile($path . 'Model' . DS . 'SourceGitTest.php');
 		return $suite;
 	}
 }

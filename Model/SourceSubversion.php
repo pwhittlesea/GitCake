@@ -16,6 +16,7 @@
  */
 
 App::uses('SourceControl', 'GitCake.Model');
+App::uses('RepoTypes', 'GitCake.Model');
 
 class SourceSubversion extends SourceControl {
 
