@@ -1,8 +1,8 @@
 <?php
 /**
- * SourceControl interface.
+ * SourceControl abstract class.
  *
- * Ensures that all source control interfaces
+ * Ensures that all source control classes
  * will be able to be probed in a standard way.
  *
  * Licensed under The MIT License
@@ -15,18 +15,18 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-interface SourceControl {
-	public static function create($base, $mode, $shared);
+abstract class SourceControl {
+	abstract public static function create($base, $mode, $shared);
 
-	public function exists($hash);
-	public function getBranches();
-	public function getCommitMetadata($hash, $metadata);
-	public function getChangedFiles($hash, $parent);
-	public function getDiff($hash, $parent, $file);
-	public function getPathDetails($branch, $path);
-	public function getType();
-	public function open($location);
-	public function revisionList($branch, $number, $offset, $file);
-	public function show($hash);
-	public function treeList($branch, $folderPath);
+	abstract public function exists($hash);
+	abstract public function getBranches();
+	abstract public function getCommitMetadata($hash, $metadata);
+	abstract public function getChangedFiles($hash, $parent);
+	abstract public function getDiff($hash, $parent, $file);
+	abstract public function getPathDetails($branch, $path);
+	abstract public function getType();
+	abstract public function open($location);
+	abstract public function revisionList($branch, $number, $offset, $file);
+	abstract public function show($hash);
+	abstract public function treeList($branch, $folderPath);
 }

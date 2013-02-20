@@ -18,7 +18,7 @@
 App::uses('SourceControl', 'GitCake.Model');
 App::import("Vendor", "GitCake.Git", array("file"=>"Git/Git.php"));
 
-class SourceGit implements SourceControl {
+class SourceGit extends SourceControl {
 
 	public $repo = null;
 	public $type = RepoTypes::GIT;
@@ -171,12 +171,16 @@ class SourceGit implements SourceControl {
  * @return void
  */
 	public function getCommitMetadata($hash, $metadata) {
+		if (!is_array($metadata)) {
+			$metadata = array($metadata);
+		}
+
 		$metadataString = $this->constructMetadataString($metadata);
 		$metadataRegex = $this->constructMetadataRegex($metadata);
 
-		$result = $this->exec("--no-pager show -s --format='{$metadataString}' $hash");
+		$gitResult = $this->exec("--no-pager show -s --format='{$metadataString}' $hash");
 
-		preg_match($metadataRegex, $result, $result);
+		preg_match($metadataRegex, $gitResult, $result);
 
 		$return = array();
 
