@@ -107,6 +107,23 @@ class SourceGit extends SourceControl {
 	}
 
 /**
+ * calculateBranches function.
+ *
+ * @access public
+ * @param array $branches as returned from a git branch call
+ * @return array of matching branches
+ */
+	public function calculateBranches($branches = array()) {
+		$cleanedBranches = array();
+		foreach ($branches as $branch) {
+			if (preg_match('/^(\*\s+)?(?P<name>.+)/', $branch, $matches)) {
+				$cleanedBranches[] = $matches['name'];
+			}
+		}
+		return $cleanedBranches;
+	}
+
+/**
  * create function.
  * Create a repo at a location
  *
@@ -292,11 +309,7 @@ class SourceGit extends SourceControl {
 	public function open($location) {
 		$this->repo = Git::open($location);
 
-		foreach (explode("\n", $this->exec('branch')) as $value) {
-			if (preg_match('/^\*? +(?P<name>\S+)/', $value, $matches)) {
-				$this->branches[] = $matches['name'];
-			}
-		}
+		$this->branches = $this->calculateBranches(explode("\n", $this->exec('branch')));
 
 		return $this->repo;
 	}

@@ -99,4 +99,22 @@ class SourceGitTestCase extends CakeTestCase {
 			$this->fail('The show funciton did not contain the required string.');
 		}
 	}
+
+	public function testBranchRegex() {
+		$inBranches = array(
+			'develop',
+			'* master',
+			'feature/branch1',
+			'feature/branch with spaces',
+			'folder with spaces/branch2'
+		);
+		$outBranches = $this->SourceGit->calculateBranches($inBranches);
+
+		$this->assertTrue(in_array('develop', $outBranches));
+		$this->assertTrue(in_array('master', $outBranches));
+		$this->assertTrue(in_array('feature/branch1', $outBranches));
+		$this->assertTrue(in_array('feature/branch with spaces', $outBranches));
+		$this->assertTrue(in_array('folder with spaces/branch2', $outBranches));
+		$this->assertFalse(in_array('* master', $outBranches));
+	}
 }
