@@ -185,4 +185,19 @@ class SourceGitTestCase extends CakeTestCase {
 		$this->assertEquals($expectedOutput, $lastRevision);
 	}
 
+/**
+ * testRevisionListWithDoubleQuote function.
+ * Test that folders and files with double quotes in the name are escaped properly with the revisionList function.
+ *
+ * @access public
+ * @return void
+ */
+	public function testRevisionListWithDoubleQuote() {
+		$this->SourceGit->open(App::pluginPath('GitCake'));
+		$expectedOutput = array('8f6b979c9a8a12122845758e44dff39845e3bf69');
+		$lastRevision = $this->SourceGit->revisionList('master', 1, 0, "Test/Sample/folder_example_quot'e/file_example_quot" . '"e');
+
+		$this->assertEquals($expectedOutput, $lastRevision);
+	}
+
 }
