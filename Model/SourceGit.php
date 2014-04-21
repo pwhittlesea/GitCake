@@ -21,6 +21,27 @@ App::import("Vendor", "GitCake.Git", array("file"=>"Git" . DS . "Git.php"));
 
 class SourceGit extends SourceControl {
 
+/**
+ * ensureValidHash function.
+ * Check that a hash provied is valid by the following criteria:
+ *   - Is alphanumeric
+ *   - Has length greated then 0
+ * If the hash is not valid then throw a generic exception.
+ *
+ * @access public static
+ * @param string $hash
+ * @return boolean true if passes
+ */
+	public static function ensureValidHash($hash) {
+		if (strlen($hash) < 1) {
+			throw new Exception("The provided hash ($hash) is not valid. Reason: Hash is zero length");
+		}
+		if (!preg_match('/^[A-Za-z0-9]+$/', $hash)) {
+			throw new Exception("The provided hash ($hash) is not valid. Reason: Hash is not alphanumeric");
+		}
+		return true;
+	}
+
 	public $repo = null;
 	public $type = RepoTypes::GIT;
 	private $branches = array();
@@ -109,7 +130,7 @@ class SourceGit extends SourceControl {
 /**
  * calculateBranches function.
  *
- * @access public
+ * @access public (Due to test requirement TODO)
  * @param array $branches as returned from a git branch call
  * @return array of matching branches
  */
@@ -167,6 +188,7 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function exists($hash = null) {
+		SourceGit::ensureValidHash($hash);
 		return $this->exec("rev-parse $hash");
 	}
 
@@ -189,6 +211,8 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function getCommitMetadata($hash, $metadata) {
+		SourceGit::ensureValidHash($hash);
+
 		if (!is_array($metadata)) {
 			$metadata = array($metadata);
 		}
@@ -225,9 +249,13 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function getChangedFiles($hash, $parent) {
+		SourceGit::ensureValidHash($hash);
 		if ($parent == null || $parent == '') {
 			$parent = '--root';
+		} else {
+			SourceGit::ensureValidHash($parent);
 		}
+
 		$changes = $this->exec("diff-tree --name-only -r $parent $hash");
 
 		$changes = str_replace("$hash\n", '', $changes);
@@ -244,9 +272,14 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function getDiff($hash, $parent, $file = '') {
+		SourceGit::ensureValidHash($hash);
+		$file = escapeshellarg($file);
 		if ($parent == null || $parent == '') {
 			$parent = '--root';
+		} else {
+			SourceGit::ensureValidHash($parent);
 		}
+
 		if ($file != '') {
 			$fileName = "-- $file";
 		} else {
@@ -264,6 +297,9 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function getPathDetails($branch, $path) {
+		$branch = escapeshellarg($branch);
+		$file = escapeshellarg($file);
+
 		// Check the last character isnt a / otherwise git will return the contents of the folder
 		if ($path != '' && $path[strlen($path)-1] == '/') {
 			$path = substr($path, 0, strlen($path)-1);
@@ -325,6 +361,11 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function revisionList($branch, $number, $offset, $file = '') {
+		$branch = escapeshellarg($branch);
+		$number = escapeshellarg($number);
+		$offset = escapeshellarg($offset);
+		$file = escapeshellarg($file);
+
 		return explode("\n", $this->exec("rev-list -n $number --skip=$offset $branch -- $file"));
 	}
 
@@ -336,6 +377,7 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function show($hash) {
+		SourceGit::ensureValidHash($hash);
 		return $this->exec("show $hash");
 	}
 
@@ -348,6 +390,9 @@ class SourceGit extends SourceControl {
  * @return void
  */
 	public function treeList($branch, $folderPath = '') {
+		$branch = escapeshellarg($branch);
+		$folderPath = escapeshellarg($folderPath);
+
 		$contents = array();
 
 		foreach (explode("\n", $this->exec("ls-tree $branch -- $folderPath")) as $a => $file) {

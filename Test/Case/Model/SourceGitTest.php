@@ -23,6 +23,58 @@ class SourceGitTestCase extends CakeTestCase {
 	}
 
 /**
+ * testEnsureValidHash function.
+ * Test that the ensureValidHash method correctly identifies a valid hash.
+ *
+ * @access public
+ * @return void
+ */
+	public function testEnsureValidHash() {
+		// Check happy path
+		$this->assertTrue(SourceGit::ensureValidHash('b1bcad6cc5be9a89df080a810a03c81970ddcfb5'));
+
+		// Check underscores are not allowed
+		try {
+			$this->assertTrue(SourceGit::ensureValidHash('b1bcad6cc5be9a89df080a810_03c81970ddcfb5'));
+			$this->fail('b1bcad6cc5be9a89df080a810_03c81970ddcfb5 should have caused an exception.');
+		} catch (Exception $e) {
+			$this->assertContains('Hash is not alphanumeric', $e->getMessage());
+		}
+
+		// Check dashes are not allowed
+		try {
+			$this->assertTrue(SourceGit::ensureValidHash('b1bcad6cc5be9a89df080a810-03c81970ddcfb5'));
+			$this->fail('b1bcad6cc5be9a89df080a810-03c81970ddcfb5 should have caused an exception.');
+		} catch (Exception $e) {
+			$this->assertContains('Hash is not alphanumeric', $e->getMessage());
+		}
+
+		// Check single quotes are not allowed
+		try {
+			$this->assertTrue(SourceGit::ensureValidHash("b1bcad6cc5be9a89df080a810'03c81970ddcfb5"));
+			$this->fail("b1bcad6cc5be9a89df080a810'03c81970ddcfb5 should have caused an exception.");
+		} catch (Exception $e) {
+			$this->assertContains('Hash is not alphanumeric', $e->getMessage());
+		}
+
+		// Check double quotes are not allowed
+		try {
+			$this->assertTrue(SourceGit::ensureValidHash('b1bcad6cc5be9a89df080a810"03c81970ddcfb5'));
+			$this->fail('b1bcad6cc5be9a89df080a810"03c81970ddcfb5 should have caused an exception.');
+		} catch (Exception $e) {
+			$this->assertContains('Hash is not alphanumeric', $e->getMessage());
+		}
+
+		// Check empty hashes are not allowed
+		try {
+			$this->assertTrue(SourceGit::ensureValidHash(''));
+			$this->fail('No hash should have caused an exception.');
+		} catch (Exception $e) {
+			$this->assertContains('Hash is zero length', $e->getMessage());
+		}
+	}
+
+/**
  * testOpen function.
  * Test that we can open the current repo
  *
@@ -117,4 +169,20 @@ class SourceGitTestCase extends CakeTestCase {
 		$this->assertTrue(in_array('folder with spaces/branch2', $outBranches));
 		$this->assertFalse(in_array('* master', $outBranches));
 	}
+
+/**
+ * testRevisionListWithQuote function.
+ * Test that folders and files with quotes in the name are escaped properly with the revisionList function.
+ *
+ * @access public
+ * @return void
+ */
+	public function testRevisionListWithQuote() {
+		$this->SourceGit->open(App::pluginPath('GitCake'));
+		$expectedOutput = array('47b0c27c9778e4c85af26ca09428d7af7a09f42a');
+		$lastRevision = $this->SourceGit->revisionList('master', 1, 0, "Test/Sample/folder_example_quot'e/file_example_quot'e");
+
+		$this->assertEquals($expectedOutput, $lastRevision);
+	}
+
 }
