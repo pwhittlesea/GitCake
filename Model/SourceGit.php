@@ -298,7 +298,7 @@ class SourceGit extends SourceControl {
  */
 	public function getPathDetails($branch, $path) {
 		$branch = escapeshellarg($branch);
-		$file = escapeshellarg($file);
+		$path = escapeshellarg($path);
 
 		// Check the last character isnt a / otherwise git will return the contents of the folder
 		if ($path != '' && $path[strlen($path)-1] == '/') {
@@ -314,7 +314,7 @@ class SourceGit extends SourceControl {
 			);
 		}
 
-		if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $this->exec("ls-tree $branch -- $path"), $details)) {
+		if (!preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $this->exec("ls-tree -z $branch -- $path"), $details)) {
 			return null;
 		}
 		return array(
@@ -395,7 +395,7 @@ class SourceGit extends SourceControl {
 
 		$contents = array();
 
-		foreach (explode("\n", $this->exec("ls-tree $branch -- $folderPath")) as $a => $file) {
+		foreach (explode("\0", $this->exec("ls-tree -z $branch -- $folderPath")) as $a => $file) {
 			if (preg_match('/^(?P<permissions>[0-9]+) (?P<type>[a-z]+) (?P<hash>[0-9a-zA-Z]+)\s(?P<name>.+)/', $file, $matches)) {
 				$contents[$a] = array(
 					'permissions' => $matches['permissions'],
